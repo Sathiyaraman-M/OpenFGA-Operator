@@ -95,7 +95,7 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 .Intersect(existingStates.Keys)
                 .Select(hash => existingStates[hash]);
 
-            var managedTupleStatesForSuccessfulTuples = clientWriteResponse.Writes.Where(x => x.Status == ClientWriteStatus.SUCCESS)
+            var managedTupleStatesForSuccessfulNewTuples = clientWriteResponse.Writes.Where(x => x.Status == ClientWriteStatus.SUCCESS)
                 .Select(x => x.TupleKey)
                 .Select(tupleKey => new V1TupleSet.V1TupleSetStatus.ManagedTupleState()
                 {
@@ -106,7 +106,18 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 })
                 .ToList();
 
-            tupleSet.Status.ManagedTupleStates = [.. managedTupleStatesForExistingTuples, .. managedTupleStatesForSuccessfulTuples];
+            var managedTupleStatesForFailedDeletedTuples = clientWriteResponse.Deletes.Where(x => x.Status == ClientWriteStatus.FAILURE)
+                .Select(x => x.TupleKey)
+                .Select(tupleKey => new V1TupleSet.V1TupleSetStatus.ManagedTupleState()
+                {
+                    Hash = ComputeHash($"{tupleKey.User}|{tupleKey.Relation}|{tupleKey.Object}"),
+                    User = tupleKey.User,
+                    Relation = tupleKey.Relation,
+                    Object = tupleKey.Object
+                })
+                .ToList();
+
+            tupleSet.Status.ManagedTupleStates = [.. managedTupleStatesForExistingTuples, .. managedTupleStatesForSuccessfulNewTuples, .. managedTupleStatesForFailedDeletedTuples];
         }
 
         tupleSet.Status.StoreId = storeId;
