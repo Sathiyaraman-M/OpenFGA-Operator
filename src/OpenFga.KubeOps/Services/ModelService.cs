@@ -34,13 +34,6 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
 
         logger.LogInformation("Updating authorization model for store {StoreId} with hash {ModelHash}.", storeId, modelJsonHash);
 
-        model.Status.Conditions.SetCondition(
-            type: "Ready",
-            status: "False",
-            reason: "ModelHashChanged",
-            message: $"Authorization model content has changed. New hash is {modelJsonHash}."
-        );
-
         var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJsonContent);
         var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
 

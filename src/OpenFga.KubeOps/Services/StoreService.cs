@@ -44,13 +44,6 @@ public class StoreService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
         {
             logger.LogInformation("Store with name {StoreName} not found in OpenFGA. Creating new store.", storeName);
 
-            store.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "StoreMissing",
-                message: $"Store with name {storeName} was not found in OpenFGA. A new store will be created."
-            );
-
             var createStoreRequest = new ClientCreateStoreRequest() { Name = storeName };
             var createStoreResponse = await openFgaClient.CreateStore(createStoreRequest, cancellationToken: cancellationToken);
 
