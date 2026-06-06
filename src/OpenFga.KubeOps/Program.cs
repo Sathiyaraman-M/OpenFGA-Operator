@@ -1,6 +1,8 @@
 using KubeOps.Operator;
-
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenFga.KubeOps.Services;
+using OpenFga.KubeOps.Services.Resolvers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -15,6 +17,10 @@ builder.Services
     })
 #endif
     .RegisterComponents();
+
+builder.Services.AddScoped<ConnectionConfigResolver>();
+builder.Services.AddScoped<OpenFgaClientFactory>();
+builder.Services.AddScoped<StoreService>();
 
 using var host = builder.Build();
 await host.RunAsync();

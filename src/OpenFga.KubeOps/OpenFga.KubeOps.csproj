@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <IsPackable>false</IsPackable>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <NoWarn>CA1873</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
