@@ -6,6 +6,7 @@ using KubeOps.Abstractions.Entities.Attributes;
 namespace OpenFga.KubeOps.Entities;
 
 [KubernetesEntity(Group = "openfga.dev", ApiVersion = "v1alpha", Kind = "ConnectionConfig")]
+[EntityScope(EntityScope.Cluster)]
 public sealed class V1ConnectionConfig : CustomKubernetesEntity<V1ConnectionConfig.V1ConnectionConfigSpec>
 {
     public class V1ConnectionConfigSpec

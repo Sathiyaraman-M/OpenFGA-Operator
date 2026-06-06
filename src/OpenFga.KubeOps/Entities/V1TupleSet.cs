@@ -7,6 +7,7 @@ using OpenFga.KubeOps.Entities.Shared;
 namespace OpenFga.KubeOps.Entities;
 
 [KubernetesEntity(Group = "openfga.dev", ApiVersion = "v1alpha", Kind = "TupleSet")]
+[EntityScope(EntityScope.Cluster)]
 public sealed class V1TupleSet : CustomKubernetesEntity<V1TupleSet.V1TupleSetSpec, V1TupleSet.V1TupleSetStatus>
 {
     public class V1TupleSetSpec
