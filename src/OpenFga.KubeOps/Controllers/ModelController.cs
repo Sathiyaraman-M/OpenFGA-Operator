@@ -16,7 +16,7 @@ public sealed class ModelController(ModelService modelService, ILogger<ModelCont
         string? storeId, modelId;
         try
         {
-            var result = await modelService.UpdateAuthorizationModelAsync(entity);
+            var result = await modelService.UpdateAuthorizationModelAsync(entity, cancellationToken);
             storeId = result.StoreId;
             modelId = result.ModelId;
         }

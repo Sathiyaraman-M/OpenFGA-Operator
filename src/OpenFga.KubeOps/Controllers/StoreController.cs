@@ -16,7 +16,7 @@ public sealed class StoreController(StoreService storeService, ILogger<StoreCont
         string? storeId;
         try
         {
-            storeId = await storeService.EnsureStoreExistsAsync(entity);
+            storeId = await storeService.EnsureStoreExistsAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {

@@ -5,9 +5,9 @@ namespace OpenFga.KubeOps.Services;
 
 public class OpenFgaClientFactory(ConnectionConfigResolver connectionConfigResolver)
 {
-    public async Task<OpenFgaClient> Create(string connectionConfigName)
+    public async Task<OpenFgaClient> Create(string connectionConfigName, CancellationToken cancellationToken = default)
     {
-        var config = await connectionConfigResolver.ResolveAsync(connectionConfigName);
+        var config = await connectionConfigResolver.ResolveAsync(connectionConfigName, cancellationToken);
         var clientConfiguration = new ClientConfiguration
         {
             ApiUrl = config.ApiUrl

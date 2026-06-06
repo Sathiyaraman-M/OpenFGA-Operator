@@ -6,9 +6,9 @@ namespace OpenFga.KubeOps.Services.Resolvers;
 
 public class ConnectionConfigResolver(IKubernetesClient client)
 {
-    public async Task<ConnectionConfig> ResolveAsync(string configName)
+    public async Task<ConnectionConfig> ResolveAsync(string configName, CancellationToken cancellationToken = default)
     {
-        var config = await client.GetAsync<V1ConnectionConfig>(configName)
+        var config = await client.GetAsync<V1ConnectionConfig>(configName, cancellationToken: cancellationToken)
             ?? throw new ConnectionConfigNotFoundException(configName);
 
         return new ConnectionConfig
