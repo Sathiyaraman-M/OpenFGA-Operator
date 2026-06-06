@@ -13,12 +13,9 @@ public sealed class ModelController(ModelService modelService, ILogger<ModelCont
 {
     public async Task<ReconciliationResult<V1AuthorizationModel>> ReconcileAsync(V1AuthorizationModel entity, CancellationToken cancellationToken)
     {
-        string? storeId, modelId;
         try
         {
-            var result = await modelService.UpdateAuthorizationModelAsync(entity, cancellationToken);
-            storeId = result.StoreId;
-            modelId = result.ModelId;
+            await modelService.UpdateAuthorizationModelAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {
@@ -35,8 +32,6 @@ public sealed class ModelController(ModelService modelService, ILogger<ModelCont
             logger.LogError(e, "Something went wrong while updating OpenFGA Authorization Model {}", entity.Name());
             return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
         }
-
-        entity.Status.StoreId = storeId;
 
         return ReconciliationResult<V1AuthorizationModel>.Success(entity);
     }

@@ -13,10 +13,9 @@ public sealed class StoreController(StoreService storeService, ILogger<StoreCont
 {
     public async Task<ReconciliationResult<V1AuthorizationStore>> ReconcileAsync(V1AuthorizationStore entity, CancellationToken cancellationToken)
     {
-        string? storeId;
         try
         {
-            storeId = await storeService.EnsureStoreExistsAsync(entity, cancellationToken);
+            await storeService.EnsureStoreExistsAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {
@@ -28,8 +27,6 @@ public sealed class StoreController(StoreService storeService, ILogger<StoreCont
             logger.LogError(e, "Something went wrong while reconciling OpenFGA Store {}", entity.Name());
             return ReconciliationResult<V1AuthorizationStore>.Failure(entity, e.Message, e);
         }
-
-        entity.Status.StoreId = storeId;
 
         return ReconciliationResult<V1AuthorizationStore>.Success(entity);
     }
