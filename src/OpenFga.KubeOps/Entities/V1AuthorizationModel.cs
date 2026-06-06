@@ -1,0 +1,36 @@
+using k8s.Models;
+
+using KubeOps.Abstractions.Entities;
+using KubeOps.Abstractions.Entities.Attributes;
+using OpenFga.KubeOps.Entities.Shared;
+
+namespace OpenFga.KubeOps.Entities;
+
+[KubernetesEntity(Group = "openfga.dev", ApiVersion = "v1alpha", Kind = "AuthorizationModel")]
+public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1AuthorizationModel.V1AuthorizationModelSpec, V1AuthorizationModel.V1AuthorizationModelStatus>
+{
+    public class V1AuthorizationModelSpec
+    {
+        public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
+
+        [Required]
+        [Description("FGA Model Content in DSL format")]
+        public string Model { get; set; } = string.Empty;
+
+        public AuthorizationStoreReference StoreRef { get; set; } = new();
+    }
+
+    public class V1AuthorizationModelStatus
+    {
+        [Description("Store ID for the OpenFGA Store")]
+        public string StoreId { get; set; } = string.Empty;
+
+        [Description("Model ID for the current OpenFGA Authorization Model")]
+        public string ModelId { get; set; } = string.Empty;
+
+        [Description("SHA256 Hash for the current OpenFGA Authorization Model")]
+        public string ObservedModelHash { get; set; } = string.Empty;
+
+        public List<V1Condition> Conditions { get; set; } = [];
+    }
+}
