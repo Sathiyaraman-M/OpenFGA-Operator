@@ -19,6 +19,16 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
 
         var modelJsonContent = model.Spec.ModelJson;
+        var modelJsonHash = ComputeHash(modelJsonContent);
+
+        if (model.Status.ObservedModelHash == modelJsonHash)
+        {
+            var existingModelId = model.Status.ModelId;
+            if (!string.IsNullOrWhiteSpace(existingModelId))
+            {
+                return model.Status.ModelId;
+            }
+        }
 
         var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJsonContent);
         var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
@@ -26,11 +36,17 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
         var modelId = clientWriteModelResponse.AuthorizationModelId;
 
         model.Status.ModelId = modelId;
-        var modelHashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(modelJsonContent));
-        model.Status.ObservedModelHash = Encoding.UTF8.GetString(modelHashBytes);
+        model.Status.ObservedModelHash = modelJsonHash;
 
         await kubernetesClient.UpdateStatusAsync(model, cancellationToken);
 
         return model.Status.ModelId;
+    }
+
+    private static string ComputeHash(string content)
+    {
+        var bytes = Encoding.UTF8.GetBytes(content);
+        var hashBytes = SHA256.HashData(bytes);
+        return Convert.ToHexString(hashBytes);
     }
 }

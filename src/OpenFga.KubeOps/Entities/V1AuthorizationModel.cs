@@ -23,9 +23,6 @@ public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1Authorizatio
 
     public class V1AuthorizationModelStatus
     {
-        [Description("Store ID for the OpenFGA Store")]
-        public string StoreId { get; set; } = string.Empty;
-
         [Description("Model ID for the current OpenFGA Authorization Model")]
         public string ModelId { get; set; } = string.Empty;
 
