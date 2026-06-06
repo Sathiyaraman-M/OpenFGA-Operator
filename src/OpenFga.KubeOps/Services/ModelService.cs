@@ -15,7 +15,7 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
     public async Task<AuthorizationModelId> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
     {
         var configRef = model.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.Create(configRef.Name, cancellationToken);
+        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
 
         var storeRef = model.Spec.StoreRef;
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);

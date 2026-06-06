@@ -12,7 +12,7 @@ public class StoreService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
     public async Task<StoreId> EnsureStoreExistsAsync(V1AuthorizationStore store, CancellationToken cancellationToken = default)
     {
         var configRef = store.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.Create(configRef.Name, cancellationToken);
+        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
 
         var existingStoreId = store.Status.StoreId;
         if (!string.IsNullOrWhiteSpace(existingStoreId))
