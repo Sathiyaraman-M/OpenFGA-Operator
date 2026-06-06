@@ -1,14 +1,13 @@
 using k8s.Models;
-using KubeOps.KubernetesClient;
+using KubeOps.Abstractions.Events;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
-using OpenFga.KubeOps.Extensions;
 using OpenFga.KubeOps.Models;
 using OpenFga.Sdk.Client.Model;
 
 namespace OpenFga.KubeOps.Services;
 
-public class StoreService(OpenFgaClientFactory openFgaClientFactory, IKubernetesClient kubernetesClient, ILogger<StoreService> logger)
+public class StoreService(OpenFgaClientFactory openFgaClientFactory, EventPublisher eventPublisher, ILogger<StoreService> logger)
 {
     public async Task<StoreId> EnsureStoreExistsAsync(V1AuthorizationStore store, CancellationToken cancellationToken = default)
     {
@@ -31,35 +30,40 @@ public class StoreService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
         {
             logger.LogInformation("Store with name {StoreName} already exists in OpenFGA with ID {StoreId}.", storeName, targetStore.Id);
 
-            store.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
+            await eventPublisher(
+                entity: store,
                 reason: "StoreAlreadyExists",
-                message: $"Store with name {storeName} already exists in OpenFGA with ID {targetStore.Id}. No action is needed."
+                message: $"Store with name {storeName} already exists in OpenFGA with ID {targetStore.Id}. No action is needed.",
+                type: EventType.Normal,
+                cancellationToken: cancellationToken
             );
 
-            store.Status.StoreId = targetStore.Id;
-        }
-        else
-        {
-            logger.LogInformation("Store with name {StoreName} not found in OpenFGA. Creating new store.", storeName);
-
-            var createStoreRequest = new ClientCreateStoreRequest() { Name = storeName };
-            var createStoreResponse = await openFgaClient.CreateStore(createStoreRequest, cancellationToken: cancellationToken);
-
-            logger.LogInformation("Created new store with name {StoreName} in OpenFGA with ID {StoreId}.", storeName, createStoreResponse.Id);
-            store.Status.StoreId = createStoreResponse.Id;
-
-            store.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
-                reason: "StoreCreationSuccessful",
-                message: $"Store with name {storeName} has been created in OpenFGA with ID {createStoreResponse.Id}. The store is now ready to be used."
-            );
+            return targetStore.Id;
         }
 
-        await kubernetesClient.UpdateStatusAsync(store, cancellationToken);
+        logger.LogInformation("Store with name {StoreName} not found in OpenFGA. Creating new store.", storeName);
 
-        return store.Status.StoreId;
+        await eventPublisher(
+            entity: store,
+            reason: "StoreCreationStarted",
+            message: $"Store with name {storeName} not found in OpenFGA. Starting creation of new store.",
+            type: EventType.Normal,
+            cancellationToken: cancellationToken
+        );
+
+        var createStoreRequest = new ClientCreateStoreRequest() { Name = storeName };
+        var createStoreResponse = await openFgaClient.CreateStore(createStoreRequest, cancellationToken: cancellationToken);
+
+        logger.LogInformation("Created new store with name {StoreName} in OpenFGA with ID {StoreId}.", storeName, createStoreResponse.Id);
+
+        await eventPublisher(
+            entity: store,
+            reason: "StoreCreationSuccessful",
+            message: $"Store with name {storeName} has been created in OpenFGA with ID {createStoreResponse.Id}. The store is now ready to be used.",
+            type: EventType.Normal,
+            cancellationToken: cancellationToken
+        );
+
+        return createStoreResponse.Id;
     }
 }

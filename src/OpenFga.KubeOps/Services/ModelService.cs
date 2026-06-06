@@ -1,7 +1,5 @@
-using KubeOps.KubernetesClient;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
-using OpenFga.KubeOps.Extensions;
 using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
@@ -10,9 +8,9 @@ using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
-public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetesClient kubernetesClient, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
+public class ModelService(OpenFgaClientFactory openFgaClientFactory, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
 {
-    public async Task<AuthorizationModelId> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
+    public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
     {
         var configRef = model.Spec.ConnectionConfigRef;
         using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
@@ -28,7 +26,7 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
             var existingModelId = model.Status.ModelId;
             if (!string.IsNullOrWhiteSpace(existingModelId))
             {
-                return model.Status.ModelId;
+                return new UpdateAuthorizationModelResult(model.Status.ModelId, modelJsonHash);
             }
         }
 
@@ -41,18 +39,7 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
 
         logger.LogInformation("Updated authorization model for store {StoreId} with new model ID {ModelId}.", storeId, modelId);
 
-        model.Status.ModelId = modelId;
-        model.Status.ObservedModelHash = modelJsonHash;
-        model.Status.Conditions.SetCondition(
-            type: "Ready",
-            status: "True",
-            reason: "ModelUpdateSuccessful",
-            message: $"Authorization model was successfully updated with model ID {modelId}."
-        );
-
-        await kubernetesClient.UpdateStatusAsync(model, cancellationToken);
-
-        return model.Status.ModelId;
+        return new UpdateAuthorizationModelResult(modelId, modelJsonHash);
     }
 
     private static string ComputeHash(string content)
