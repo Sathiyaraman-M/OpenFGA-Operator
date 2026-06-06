@@ -2,6 +2,7 @@ using k8s.Models;
 using KubeOps.KubernetesClient;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
+using OpenFga.KubeOps.Extensions;
 using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
 using System.Security.Cryptography;
@@ -11,7 +12,7 @@ namespace OpenFga.KubeOps.Services;
 
 public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKubernetesClient kubernetesClient, AuthorizationStoreResolver authorizationStoreResolver, ILogger<TupleSetService> logger)
 {
-    public async Task ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
+    public async Task<bool> ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var configRef = tupleSet.Spec.ConnectionConfigRef;
         using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
@@ -45,7 +46,7 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
 
         if (tuplesToAdd.Count == 0 && tuplesToRemove.Count == 0)
         {
-            return;
+            return true;
         }
 
         var clientWriteRequest = new ClientWriteRequest(writes: tuplesToAdd, deletes: tuplesToRemove);
@@ -62,13 +63,12 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
         {
             logger.LogInformation("Successfully reconciled tuple set {TupleSetName} for store {StoreId}. Added {AddCount} tuples and removed {RemoveCount} tuples.", tupleSet.Name(), storeId, tuplesToAdd.Count, tuplesToRemove.Count);
 
-            tupleSet.Status.Conditions.Add(new V1Condition()
-            {
-                Type = "Ready",
-                Status = "True",
-                Reason = "TupleSetReconcileSuccessful",
-                Message = $"Tuple set was reconciled. Added {clientWriteResponse.Writes.Count} tuples and removed {clientWriteResponse.Deletes.Count} tuples."
-            });
+            tupleSet.Status.Conditions.SetCondition(
+                type: "Ready",
+                status: "True",
+                reason: "TupleSetReconcileSuccessful",
+                message: $"Tuple set was reconciled. Added {clientWriteResponse.Writes.Count(x => x.Status == ClientWriteStatus.SUCCESS)} tuples and removed {clientWriteResponse.Deletes.Count(x => x.Status == ClientWriteStatus.SUCCESS)} tuples."
+            );
 
             tupleSet.Status.ManagedTupleStates = [.. desiredStates.Values];
         }
@@ -84,13 +84,12 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 logger.LogError("Failed to reconcile tuple set {TupleSetName} for store {StoreId}. Tuple '{TupleKey}' failed with error: {ErrorMessage}", tupleSet.Name(), storeId, $"{tuple.User}|{tuple.Relation}|{tuple.Object}", error);
             }
 
-            tupleSet.Status.Conditions.Add(new V1Condition()
-            {
-                Type = "Ready",
-                Status = "False",
-                Reason = "TupleSetReconcilePartiallySuccessful",
-                Message = $"Tuple set reconciliation encountered errors. {failedTuplesWithError.Count()} tuples failed to reconcile. Check logs for details."
-            });
+            tupleSet.Status.Conditions.SetCondition(
+                type: "Ready",
+                status: "False",
+                reason: "TupleSetReconcilePartiallySuccessful",
+                message: $"Tuple set reconciliation encountered errors. {failedTuplesWithError.Count()} tuples failed to reconcile. Check logs for details."
+            );
 
             var managedTupleStatesForExistingTuples = desiredStates.Keys
                 .Intersect(existingStates.Keys)
@@ -113,6 +112,8 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
         tupleSet.Status.StoreId = storeId;
 
         await kubernetesClient.UpdateStatusAsync(tupleSet, cancellationToken);
+
+        return fullySuccessful;
     }
 
     public async Task DeleteTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)

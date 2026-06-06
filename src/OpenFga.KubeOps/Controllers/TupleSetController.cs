@@ -15,7 +15,15 @@ public sealed class TupleSetController(TupleSetService tupleSetService, ILogger<
     {
         try
         {
-            await tupleSetService.ReconcileTupleSetAsync(entity, cancellationToken);
+            var isReconcilationSuccessful = await tupleSetService.ReconcileTupleSetAsync(entity, cancellationToken);
+            if (!isReconcilationSuccessful)
+            {
+                return ReconciliationResult<V1TupleSet>.Failure(
+                    entity: entity,
+                    errorMessage: "Reconcilation was only partially successful. Please check the logs for more details.",
+                    requeueAfter: TimeSpan.FromSeconds(30)
+                );
+            }
         }
         catch (ConnectionConfigNotFoundException e)
         {
