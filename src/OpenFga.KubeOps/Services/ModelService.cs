@@ -1,3 +1,4 @@
+using k8s.Models;
 using KubeOps.KubernetesClient;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
@@ -33,6 +34,16 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
 
         logger.LogInformation("Updating authorization model for store {StoreId} with hash {ModelHash}.", storeId, modelJsonHash);
 
+        var modelChangeCondition = new V1Condition()
+        {
+            Type = "ModelChanged",
+            Status = "True",
+            Reason = "ModelHashChanged",
+            Message = $"Authorization model content has changed. New hash is {modelJsonHash}."
+        };
+
+        model.Status.Conditions.Add(modelChangeCondition);
+
         var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJsonContent);
         var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
 
@@ -42,6 +53,16 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, IKubernetes
 
         model.Status.ModelId = modelId;
         model.Status.ObservedModelHash = modelJsonHash;
+
+        var modelUpdatedCondition = new V1Condition()
+        {
+            Type = "ModelUpdated",
+            Status = "True",
+            Reason = "ModelUpdateSuccessful",
+            Message = $"Authorization model was successfully updated with model ID {modelId}."
+        };
+
+        model.Status.Conditions.Add(modelUpdatedCondition);
 
         await kubernetesClient.UpdateStatusAsync(model, cancellationToken);
 
