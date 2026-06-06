@@ -1,10 +1,10 @@
-using System.Security.Cryptography;
-using System.Text;
 using KubeOps.KubernetesClient;
 using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
