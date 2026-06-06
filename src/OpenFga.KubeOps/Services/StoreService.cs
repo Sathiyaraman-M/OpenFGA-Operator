@@ -1,12 +1,13 @@
 using k8s.Models;
 using OpenFga.KubeOps.Entities;
+using OpenFga.KubeOps.Models;
 using OpenFga.Sdk.Client.Model;
 
 namespace OpenFga.KubeOps.Services;
 
 public class StoreService(OpenFgaClientFactory openFgaClientFactory)
 {
-    public async Task<string> EnsureStoreExistsAsync(V1AuthorizationStore store)
+    public async Task<StoreId> EnsureStoreExistsAsync(V1AuthorizationStore store)
     {
         var configRef = store.Spec.ConnectionConfigRef;
         using var openFgaClient = await openFgaClientFactory.Create(configRef.Name);
