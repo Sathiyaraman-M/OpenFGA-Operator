@@ -19,8 +19,10 @@ builder.Services
     .RegisterComponents();
 
 builder.Services.AddScoped<ConnectionConfigResolver>();
+builder.Services.AddScoped<AuthorizationStoreResolver>();
 builder.Services.AddScoped<OpenFgaClientFactory>();
 builder.Services.AddScoped<StoreService>();
+builder.Services.AddScoped<ModelService>();
 
 using var host = builder.Build();
 await host.RunAsync();

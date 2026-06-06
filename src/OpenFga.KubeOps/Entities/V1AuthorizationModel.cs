@@ -14,8 +14,8 @@ public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1Authorizatio
         public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
 
         [Required]
-        [Description("FGA Model Content in DSL format")]
-        public string Model { get; set; } = string.Empty;
+        [Description("FGA Model Content in JSON format")]
+        public string ModelJson { get; set; } = string.Empty;
 
         public AuthorizationStoreReference StoreRef { get; set; } = new();
     }
