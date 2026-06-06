@@ -33,9 +33,6 @@ public sealed class V1TupleSet : CustomKubernetesEntity<V1TupleSet.V1TupleSetSpe
 
     public class V1TupleSetStatus
     {
-        [Description("Store ID for the OpenFGA Store")]
-        public string StoreId { get; set; } = string.Empty;
-
         [Description("List of Tuples managed by K8s")]
         public List<ManagedTupleState> ManagedTupleStates { get; set; } = [];
 

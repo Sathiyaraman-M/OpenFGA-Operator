@@ -1,8 +1,8 @@
 using k8s.Models;
-using KubeOps.KubernetesClient;
+using KubeOps.Abstractions.Events;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
-using OpenFga.KubeOps.Extensions;
+using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
 using System.Security.Cryptography;
@@ -10,9 +10,9 @@ using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
-public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKubernetesClient kubernetesClient, AuthorizationStoreResolver authorizationStoreResolver, ILogger<TupleSetService> logger)
+public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPublisher eventPublisher, AuthorizationStoreResolver authorizationStoreResolver, ILogger<TupleSetService> logger)
 {
-    public async Task<bool> ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
+    public async Task<ReconcileTupleSetResult> ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var configRef = tupleSet.Spec.ConnectionConfigRef;
         using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
@@ -44,15 +44,25 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 .Select(MapToClientTupleKeyWithoutCondition)
                 .ToList();
 
+        var unchangedTuplesCount = desiredStates.Keys.Intersect(existingStates.Keys).Count();
+
         if (tuplesToAdd.Count == 0 && tuplesToRemove.Count == 0)
         {
-            return true;
+            return new ReconcileTupleSetResult(true, [.. existingStates.Values]);
         }
 
         var clientWriteRequest = new ClientWriteRequest(writes: tuplesToAdd, deletes: tuplesToRemove);
         var clientWriteOptions = new ClientWriteOptions() { StoreId = storeId };
 
         logger.LogInformation("Reconciling tuple set {TupleSetName} for store {StoreId}. Adding {AddCount} tuples and removing {RemoveCount} tuples.", tupleSet.Name(), storeId, tuplesToAdd.Count, tuplesToRemove.Count);
+
+        await eventPublisher(
+            entity: tupleSet,
+            reason: "TupleSetReconcileStarted",
+            message: $"Started reconciliation of tuple set. Adding {tuplesToAdd.Count} tuples and removing {tuplesToRemove.Count} tuples. {unchangedTuplesCount} tuples are unchanged.",
+            type: EventType.Normal,
+            cancellationToken: cancellationToken
+        );
 
         var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, clientWriteOptions, cancellationToken);
 
@@ -63,14 +73,15 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
         {
             logger.LogInformation("Successfully reconciled tuple set {TupleSetName} for store {StoreId}. Added {AddCount} tuples and removed {RemoveCount} tuples.", tupleSet.Name(), storeId, tuplesToAdd.Count, tuplesToRemove.Count);
 
-            tupleSet.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
+            await eventPublisher(
+                entity: tupleSet,
                 reason: "TupleSetReconcileSuccessful",
-                message: $"Tuple set was reconciled. Added {clientWriteResponse.Writes.Count(x => x.Status == ClientWriteStatus.SUCCESS)} tuples and removed {clientWriteResponse.Deletes.Count(x => x.Status == ClientWriteStatus.SUCCESS)} tuples."
+                message: $"Tuple set was reconciled successfully. Added {tuplesToAdd.Count} tuples and removed {tuplesToRemove.Count} tuples.",
+                type: EventType.Normal,
+                cancellationToken: cancellationToken
             );
 
-            tupleSet.Status.ManagedTupleStates = [.. desiredStates.Values];
+            return new ReconcileTupleSetResult(true, [.. desiredStates.Values]);
         }
         else
         {
@@ -84,11 +95,12 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 logger.LogError("Failed to reconcile tuple set {TupleSetName} for store {StoreId}. Tuple '{TupleKey}' failed with error: {ErrorMessage}", tupleSet.Name(), storeId, $"{tuple.User}|{tuple.Relation}|{tuple.Object}", error);
             }
 
-            tupleSet.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "TupleSetReconcilePartiallySuccessful",
-                message: $"Tuple set reconciliation encountered errors. {failedTuplesWithError.Count()} tuples failed to reconcile. Check logs for details."
+            await eventPublisher(
+                entity: tupleSet,
+                reason: "TupleSetReconcileFailed",
+                message: $"Tuple set reconciliation encountered errors. {failedTuplesWithError.Count()} tuples failed to reconcile. Check logs for details.",
+                type: EventType.Warning,
+                cancellationToken: cancellationToken
             );
 
             var managedTupleStatesForExistingTuples = desiredStates.Keys
@@ -117,14 +129,8 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
                 })
                 .ToList();
 
-            tupleSet.Status.ManagedTupleStates = [.. managedTupleStatesForExistingTuples, .. managedTupleStatesForSuccessfulNewTuples, .. managedTupleStatesForFailedDeletedTuples];
+            return new ReconcileTupleSetResult(false, [.. managedTupleStatesForExistingTuples, .. managedTupleStatesForSuccessfulNewTuples, .. managedTupleStatesForFailedDeletedTuples]);
         }
-
-        tupleSet.Status.StoreId = storeId;
-
-        await kubernetesClient.UpdateStatusAsync(tupleSet, cancellationToken);
-
-        return fullySuccessful;
     }
 
     public async Task DeleteTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
@@ -132,7 +138,8 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, IKuberne
         var configRef = tupleSet.Spec.ConnectionConfigRef;
         using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
 
-        var storeId = tupleSet.Status.StoreId;
+        var storeRef = tupleSet.Spec.StoreRef;
+        var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
 
         var tuplesToRemove =
             tupleSet.Status.ManagedTupleStates
