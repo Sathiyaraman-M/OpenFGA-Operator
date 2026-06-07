@@ -23,6 +23,7 @@ builder.Services.AddScoped<AuthorizationStoreResolver>();
 builder.Services.AddScoped<OpenFgaClientFactory>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<ModelService>();
+builder.Services.AddScoped<TupleSetService>();
 
 using var host = builder.Build();
 await host.RunAsync();
