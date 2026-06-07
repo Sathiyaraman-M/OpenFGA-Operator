@@ -1,3 +1,4 @@
+using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client;
 
@@ -10,7 +11,19 @@ public class OpenFgaClientFactory(ConnectionConfigResolver connectionConfigResol
         var config = await connectionConfigResolver.ResolveAsync(connectionConfigName, cancellationToken);
         var clientConfiguration = new ClientConfiguration
         {
-            ApiUrl = config.ApiUrl
+            ApiUrl = config.ApiUrl,
+            StoreId = null
+        };
+        return new OpenFgaClient(clientConfiguration);
+    }
+
+    public async Task<OpenFgaClient> CreateAsync(string connectionConfigName, StoreId storeId, CancellationToken cancellationToken = default)
+    {
+        var config = await connectionConfigResolver.ResolveAsync(connectionConfigName, cancellationToken);
+        var clientConfiguration = new ClientConfiguration
+        {
+            ApiUrl = config.ApiUrl,
+            StoreId = storeId
         };
         return new OpenFgaClient(clientConfiguration);
     }

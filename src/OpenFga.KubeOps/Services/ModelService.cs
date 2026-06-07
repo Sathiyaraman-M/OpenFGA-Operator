@@ -12,11 +12,11 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, Authorizati
 {
     public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
     {
-        var configRef = model.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
-
         var storeRef = model.Spec.StoreRef;
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
+
+        var configRef = model.Spec.ConnectionConfigRef;
+        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, storeId, cancellationToken);
 
         var modelJsonContent = model.Spec.ModelJson;
         var modelJsonHash = ComputeHash(modelJsonContent);

@@ -14,11 +14,11 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPub
 {
     public async Task<ReconcileTupleSetResult> ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
     {
-        var configRef = tupleSet.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
-
         var storeRef = tupleSet.Spec.StoreRef;
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
+
+        var configRef = tupleSet.Spec.ConnectionConfigRef;
+        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, storeId, cancellationToken);
 
         var desiredStates =
             tupleSet.Spec.Tuples
@@ -52,7 +52,6 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPub
         }
 
         var clientWriteRequest = new ClientWriteRequest(writes: tuplesToAdd, deletes: tuplesToRemove);
-        var clientWriteOptions = new ClientWriteOptions() { StoreId = storeId };
 
         logger.LogInformation("Reconciling tuple set {TupleSetName} for store {StoreId}. Adding {AddCount} tuples and removing {RemoveCount} tuples.", tupleSet.Name(), storeId, tuplesToAdd.Count, tuplesToRemove.Count);
 
@@ -64,7 +63,7 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPub
             cancellationToken: cancellationToken
         );
 
-        var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, clientWriteOptions, cancellationToken);
+        var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, cancellationToken: cancellationToken);
 
         var fullySuccessful = clientWriteResponse.Writes.Count(x => x.Status == ClientWriteStatus.SUCCESS) == tuplesToAdd.Count
                                && clientWriteResponse.Deletes.Count(x => x.Status == ClientWriteStatus.SUCCESS) == tuplesToRemove.Count;
@@ -135,11 +134,11 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPub
 
     public async Task DeleteTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
     {
-        var configRef = tupleSet.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, cancellationToken);
-
         var storeRef = tupleSet.Spec.StoreRef;
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
+
+        var configRef = tupleSet.Spec.ConnectionConfigRef;
+        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, storeId, cancellationToken);
 
         var tuplesToRemove =
             tupleSet.Status.ManagedTupleStates
@@ -152,11 +151,10 @@ public class TupleSetService(OpenFgaClientFactory openFgaClientFactory, EventPub
         }
 
         var clientWriteRequest = new ClientWriteRequest(writes: [], deletes: tuplesToRemove);
-        var clientWriteOptions = new ClientWriteOptions() { StoreId = storeId };
 
         logger.LogInformation("Deleting tuple set {TupleSetName} for store {StoreId}. Removing {RemoveCount} tuples.", tupleSet.Name(), storeId, tuplesToRemove.Count);
 
-        var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, clientWriteOptions, cancellationToken);
+        var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, cancellationToken: cancellationToken);
 
         if (clientWriteResponse.Deletes.All(x => x.Status == ClientWriteStatus.SUCCESS))
         {
