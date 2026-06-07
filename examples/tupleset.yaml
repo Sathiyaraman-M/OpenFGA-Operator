@@ -1,0 +1,19 @@
+apiVersion: openfga.dev/v1alpha
+kind: TupleSet
+metadata:
+  name: bootstrap-users
+spec:
+  connectionConfigRef:
+    name: openfga-dev
+  storeRef:
+    name: demo-store
+  tuples:
+    - user: user:alice
+      relation: member
+      object: group:engineering
+    - user: user:bob
+      relation: member
+      object: group:engineering
+    - user: group:engineering#member
+      relation: viewer
+      object: document:platform-roadmap

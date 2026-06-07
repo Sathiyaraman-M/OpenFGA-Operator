@@ -1,0 +1,6 @@
+apiVersion: openfga.dev/v1alpha
+kind: ConnectionConfig
+metadata:
+  name: openfga-dev
+spec:
+  apiUrl: http://openfga.openfga.svc.cluster.local:8080

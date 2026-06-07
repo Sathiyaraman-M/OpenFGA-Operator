@@ -1,0 +1,7 @@
+apiVersion: openfga.dev/v1alpha
+kind: AuthorizationStore
+metadata:
+  name: demo-store
+spec:
+  connectionConfigRef:
+    name: openfga-dev
