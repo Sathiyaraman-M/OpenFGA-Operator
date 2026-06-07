@@ -4,4 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
+  <PropertyGroup>
+    <OperatorName>openfga-operator</OperatorName>
+  </PropertyGroup>
 </Project>
