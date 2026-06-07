@@ -10,6 +10,7 @@ using OpenFga.KubeOps.Services;
 
 namespace OpenFga.KubeOps.Controllers;
 
+[EntityRbac(typeof(V1ConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
 [EntityRbac(typeof(V1AuthorizationModel), Verbs = RbacVerb.All)]
 public sealed class ModelController(ModelService modelService, IKubernetesClient kubernetesClient, ILogger<ModelController> logger) : IEntityController<V1AuthorizationModel>
 {

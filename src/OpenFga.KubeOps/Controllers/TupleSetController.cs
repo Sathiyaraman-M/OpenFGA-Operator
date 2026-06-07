@@ -10,6 +10,7 @@ using OpenFga.KubeOps.Services;
 
 namespace OpenFga.KubeOps.Controllers;
 
+[EntityRbac(typeof(V1ConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
 [EntityRbac(typeof(V1TupleSet), Verbs = RbacVerb.All)]
 public sealed class TupleSetController(TupleSetService tupleSetService, IKubernetesClient kubernetesClient, ILogger<TupleSetController> logger) : IEntityController<V1TupleSet>
 {
