@@ -21,13 +21,16 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
             var result = await tupleSetService.ReconcileTupleSetAsync(entity, cancellationToken);
             if (!result.IsSuccessful)
             {
-                entity.Status.Conditions.SetCondition(
-                    type: "Ready",
-                    status: "False",
-                    reason: "TupleSetReconciliationPartiallySuccessful",
-                    message: "Reconcilation was only partially successful. Please check the logs for more details."
-                );
+                entity.Status.Conditions = [
+                    V1Condition.New(
+                        type: "Ready",
+                        status: "False",
+                        reason: "TupleSetReconciliationPartiallySuccessful",
+                        message: "Reconcilation was only partially successful. Please check the logs for more details."
+                    )
+                ];
                 entity.Status.ManagedTupleStates = result.ManagedTupleStates;
+
                 await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
                 return ReconciliationResult<V1TupleSet>.Failure(
@@ -38,38 +41,45 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
             }
 
             entity.Status.ManagedTupleStates = result.ManagedTupleStates;
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
-                reason: "TupleSetReconciliationSuccessful",
-                message: $"Tuple set with name {entity.Name()} is reconciled successfully."
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "Ready",
+                    status: "True",
+                    reason: "TupleSetReconciliationSuccessful",
+                    message: $"Tuple set with name {entity.Name()} is reconciled successfully."
+                )
+            ];
+
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {
             logger.LogError(e, "Error while reconciling OpenFGA Tuple Set {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "ConnectionConfigNotFound",
-                message: e.Message
-            );
-
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "Ready",
+                    status: "False",
+                    reason: "ConnectionConfigNotFound",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
             return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationStoreNotFoundException e)
         {
             logger.LogError(e, "Error while reconciling OpenFGA Tuple Set {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "AuthorizationStoreNotFound",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "Ready",
+                    status: "False",
+                    reason: "AuthorizationStoreNotFound",
+                    message: e.Message
+                )
+            ];
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
@@ -79,12 +89,14 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
         {
             logger.LogError(e, "Something went wrong while reconciling OpenFGA Tuple Set {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "TupleSetReconciliationError",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "Ready",
+                    status: "False",
+                    reason: "TupleSetReconciliationError",
+                    message: e.Message
+                )
+            ];
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
