@@ -23,38 +23,90 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             entity.Status.ModelId = result.ModelId;
             entity.Status.ObservedModelHash = result.ModelJsonHash;
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
-                reason: "ModelUpdateSuccessful",
-                message: $"Authorization model was successfully updated with model ID {result.ModelId}."
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "True",
+                    reason: "StoreFound",
+                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "ModelReady",
+                    status: "True",
+                    reason: "ModelUpdateSuccessful",
+                    message: $"Authorization model was successfully updated with model ID {result.ModelId}."
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {
-            logger.LogError(e, "Error while updating OpenFGA Authorization Model {}", entity.Name());
+            logger.LogError(e, "Connection config with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.ConnectionConfigRef.Name, entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "ConnectionConfigNotFound",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "False",
+                    reason: "ConnectionConfigNotFound",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationStoreNotFoundException e)
         {
-            logger.LogError(e, "Error while updating OpenFGA Authorization Model {}", entity.Name());
+            logger.LogError(e, "Store with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef.Name, entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "AuthorizationStoreNotFound",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "StoreNotFound",
+                    message: e.Message
+                )
+            ];
+            await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
+            return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
+        }
+        catch (AuthorizationModelUpdateFailedException e)
+        {
+            logger.LogError(e, "Failed to update OpenFGA Authorization Model {} for store {}.", entity.Name(), entity.Spec.StoreRef.Name);
+
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "StoreNotFound",
+                    message: e.Message
+                ),
+                V1Condition.New(
+                    type: "ModelReady",
+                    status: "False",
+                    reason: "ModelUpdateFailed",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
@@ -63,12 +115,14 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
         {
             logger.LogError(e, "Something went wrong while updating OpenFGA Authorization Model {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "ModelUpdateError",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ModelReady",
+                    status: "False",
+                    reason: "UnexpectedError",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
