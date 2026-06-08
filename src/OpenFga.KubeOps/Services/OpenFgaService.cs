@@ -1,10 +1,11 @@
 using OpenFga.KubeOps.Models;
+using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
 using OpenFga.Sdk.Exceptions;
 
 namespace OpenFga.KubeOps.Services;
 
-public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
+public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory, AuthorizationStoreResolver authorizationStoreResolver)
 {
     public async Task<StoreId> CreateStoreAsync(string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
@@ -41,20 +42,22 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
         }
     }
 
-    public async Task<AuthorizationModelId> UpdateAuthorizationModelAsync(StoreId storeId, string modelJson, string connectionConfigName, CancellationToken cancellationToken)
+    public async Task<AuthorizationModelId> UpdateAuthorizationModelAsync(string modelJson, string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
         try
         {
-            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, storeId, cancellationToken);
+            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, cancellationToken);
+            var storeId = await authorizationStoreResolver.ResolveAsync(storeName, cancellationToken);
 
             var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJson);
-            var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
+            var clientWriteOptions = new ClientWriteOptions { StoreId = storeId };
+            var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, clientWriteOptions, cancellationToken);
 
             return clientWriteModelResponse.AuthorizationModelId;
         }
         catch (ApiException e)
         {
-            throw new AuthorizationModelUpdateFailedException(storeId, e);
+            throw new AuthorizationModelUpdateFailedException(storeName, e);
         }
     }
 }

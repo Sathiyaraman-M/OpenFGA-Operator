@@ -9,7 +9,7 @@ public class StoreCreationFailedException(string storeName, ApiException excepti
 
 public class StoreQueryFailedException(string storeName, ApiException exception) : KubeOpsException($"Failed to query Authorization Store {storeName}: {exception.Message}");
 
-public class AuthorizationModelUpdateFailedException(StoreId storeId, ApiException exception) : KubeOpsException($"Failed to update Authorization Model for Store {storeId}: {exception.Message}");
+public class AuthorizationModelUpdateFailedException(string storeName, ApiException exception) : KubeOpsException($"Failed to update Authorization Model for Store {storeName}: {exception.Message}");
 
 public class ConnectionConfigNotFoundException(string configName) : KubeOpsException($"Conection Config with name '{configName}' not found");
 
