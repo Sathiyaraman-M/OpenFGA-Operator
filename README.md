@@ -2,6 +2,9 @@
 
 This repository contains an OpenFGA operator implemented with KubeOps. This operator is to manage OpenFGA artifacts in Kubernetes way.
 
+> [!IMPORTANT]
+> This project is in early development and is not production-ready. The key parts of the operator are subject to change. And most importantly, this is NOT an official OpenFGA project.
+
 > [!NOTE]
 > This operator doesn't deploy or manage the OpenFGA instance itself. It assumes you have an OpenFGA instance running and accessible from your Kubernetes cluster. The operator focuses on managing OpenFGA stores, models, and tuples as Kubernetes custom resources.
 
