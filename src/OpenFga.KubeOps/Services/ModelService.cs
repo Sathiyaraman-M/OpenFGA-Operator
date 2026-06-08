@@ -2,13 +2,12 @@ using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
-using OpenFga.Sdk.Client.Model;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
-public class ModelService(OpenFgaClientFactory openFgaClientFactory, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
+public class ModelService(OpenFgaService openFgaService, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
 {
     public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
     {
@@ -16,7 +15,6 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, Authorizati
         var storeId = await authorizationStoreResolver.ResolveAsync(storeRef.Name, cancellationToken);
 
         var configRef = model.Spec.ConnectionConfigRef;
-        using var openFgaClient = await openFgaClientFactory.CreateAsync(configRef.Name, storeId, cancellationToken);
 
         var modelJsonContent = model.Spec.ModelJson;
         var modelJsonHash = ComputeHash(modelJsonContent);
@@ -32,10 +30,7 @@ public class ModelService(OpenFgaClientFactory openFgaClientFactory, Authorizati
 
         logger.LogInformation("Updating authorization model for store {StoreId} with hash {ModelHash}.", storeId, modelJsonHash);
 
-        var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJsonContent);
-        var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
-
-        var modelId = clientWriteModelResponse.AuthorizationModelId;
+        var modelId = await openFgaService.UpdateAuthorizationModelAsync(storeId, modelJsonContent, configRef.Name, cancellationToken);
 
         logger.LogInformation("Updated authorization model for store {StoreId} with new model ID {ModelId}.", storeId, modelId);
 
