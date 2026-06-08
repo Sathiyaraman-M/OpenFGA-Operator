@@ -21,24 +21,56 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
             var storeId = await storeService.EnsureStoreExistsAsync(entity, cancellationToken);
             entity.Status.StoreId = storeId;
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "True",
-                reason: "StoreReconciliationSuccessful",
-                message: $"Store with name {entity.Name()} is reconciled successfully with store ID {storeId}."
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "True",
+                    reason: "StoreReconciliationSuccessful",
+                    message: $"Store with name {entity.Name()} is reconciled successfully with store ID {storeId}."
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
         }
         catch (ConnectionConfigNotFoundException e)
         {
             logger.LogError(e, "Error while reconciling OpenFGA Store {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "ConnectionConfigNotFound",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "False",
+                    reason: "ConnectionConfigNotFound",
+                    message: e.Message
+                )
+            ];
+            await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
+            return ReconciliationResult<V1AuthorizationStore>.Failure(entity, e.Message, e);
+        }
+        catch (StoreCreationFailedException e)
+        {
+            logger.LogError(e, "Error while reconciling OpenFGA Store {}", entity.Name());
+
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "StoreCreationFailed",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1AuthorizationStore>.Failure(entity, e.Message, e);
@@ -47,12 +79,14 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
         {
             logger.LogError(e, "Something went wrong while reconciling OpenFGA Store {}", entity.Name());
 
-            entity.Status.Conditions.SetCondition(
-                type: "Ready",
-                status: "False",
-                reason: "ReconciliationError",
-                message: e.Message
-            );
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "UnexpectedError",
+                    message: e.Message
+                )
+            ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1AuthorizationStore>.Failure(entity, e.Message, e);
