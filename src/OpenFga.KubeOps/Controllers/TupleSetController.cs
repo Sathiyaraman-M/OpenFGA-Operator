@@ -10,11 +10,11 @@ using OpenFga.KubeOps.Services;
 
 namespace OpenFga.KubeOps.Controllers;
 
-[EntityRbac(typeof(V1ConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
-[EntityRbac(typeof(V1TupleSet), Verbs = RbacVerb.All)]
-public sealed class TupleSetController(TupleSetService tupleSetService, IKubernetesClient kubernetesClient, ILogger<TupleSetController> logger) : IEntityController<V1TupleSet>
+[EntityRbac(typeof(V1FgaConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
+[EntityRbac(typeof(V1FgaTupleSet), Verbs = RbacVerb.All)]
+public sealed class TupleSetController(TupleSetService tupleSetService, IKubernetesClient kubernetesClient, ILogger<TupleSetController> logger) : IEntityController<V1FgaTupleSet>
 {
-    public async Task<ReconciliationResult<V1TupleSet>> ReconcileAsync(V1TupleSet entity, CancellationToken cancellationToken)
+    public async Task<ReconciliationResult<V1FgaTupleSet>> ReconcileAsync(V1FgaTupleSet entity, CancellationToken cancellationToken)
     {
         try
         {
@@ -33,7 +33,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
                 await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-                return ReconciliationResult<V1TupleSet>.Failure(
+                return ReconciliationResult<V1FgaTupleSet>.Failure(
                     entity: entity,
                     errorMessage: "Reconcilation was only partially successful. Please check the logs for more details.",
                     requeueAfter: TimeSpan.FromSeconds(30)
@@ -66,7 +66,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationStoreNotFoundException e)
         {
@@ -83,7 +83,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
         catch (Exception e)
         {
@@ -100,13 +100,13 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
 
-        return ReconciliationResult<V1TupleSet>.Success(entity);
+        return ReconciliationResult<V1FgaTupleSet>.Success(entity);
     }
 
-    public async Task<ReconciliationResult<V1TupleSet>> DeletedAsync(V1TupleSet entity, CancellationToken cancellationToken)
+    public async Task<ReconciliationResult<V1FgaTupleSet>> DeletedAsync(V1FgaTupleSet entity, CancellationToken cancellationToken)
     {
         try
         {
@@ -115,19 +115,19 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
         catch (ConnectionConfigNotFoundException e)
         {
             logger.LogError(e, "Error while deleting OpenFGA Tuple Set {}", entity.Name());
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationStoreNotFoundException e)
         {
             logger.LogError(e, "Error while deleting OpenFGA Tuple Set {}", entity.Name());
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Something went wrong while deleting OpenFGA Tuple Set {}", entity.Name());
-            return ReconciliationResult<V1TupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
 
-        return ReconciliationResult<V1TupleSet>.Success(entity);
+        return ReconciliationResult<V1FgaTupleSet>.Success(entity);
     }
 }

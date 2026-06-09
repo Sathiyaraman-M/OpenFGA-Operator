@@ -7,8 +7,8 @@ namespace OpenFga.KubeOps.Models;
 
 public class TuplesReconcilationPlan
 {
-    public IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> ExistingStates { get; } = [];
-    public IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> DesiredStates { get; } = [];
+    public IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> ExistingStates { get; } = [];
+    public IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> DesiredStates { get; } = [];
 
     public IReadOnlyList<ClientTupleKey> TuplesToAdd { get; } = [];
     public IReadOnlyList<ClientTupleKeyWithoutCondition> TuplesToRemove { get; } = [];
@@ -16,8 +16,8 @@ public class TuplesReconcilationPlan
     public int UnchangedCount { get; }
 
     private TuplesReconcilationPlan(
-        IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> existingStates,
-        IReadOnlyList<V1TupleSet.V1TupleSetSpec.V1Tuple> desiredStates)
+        IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> existingStates,
+        IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetSpec.V1FgaTuple> desiredStates)
     {
         ExistingStates = [.. existingStates.DistinctBy(x => x.Hash)];
         DesiredStates = [.. desiredStates.Select(CreateManagedTupleState).DistinctBy(x => x.Hash)];
@@ -38,16 +38,16 @@ public class TuplesReconcilationPlan
         UnchangedCount = desiredStatesDict.Keys.Intersect(existingStatesDict.Keys).Count();
     }
 
-    public static TuplesReconcilationPlan CreateForWrite(V1TupleSet tupleSet) => new(tupleSet.Status.ManagedTupleStates, tupleSet.Spec.Tuples);
+    public static TuplesReconcilationPlan CreateForWrite(V1FgaTupleSet tupleSet) => new(tupleSet.Status.ManagedTupleStates, tupleSet.Spec.Tuples);
 
-    public static TuplesReconcilationPlan CreateForDelete(V1TupleSet tupleSet)
+    public static TuplesReconcilationPlan CreateForDelete(V1FgaTupleSet tupleSet)
     {
         var existingStates = tupleSet.Status.ManagedTupleStates;
         return new TuplesReconcilationPlan(existingStates, []);
     }
 
-    private static V1TupleSet.V1TupleSetStatus.ManagedTupleState CreateManagedTupleState(
-        V1TupleSet.V1TupleSetSpec.V1Tuple tuple) => new()
+    private static V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState CreateManagedTupleState(
+        V1FgaTupleSet.V1FgaTupleSetSpec.V1FgaTuple tuple) => new()
         {
             Hash = ComputeHash($"{tuple.User}|{tuple.Relation}|{tuple.Object}"),
             User = tuple.User,
@@ -55,14 +55,14 @@ public class TuplesReconcilationPlan
             Object = tuple.Object
         };
 
-    private static ClientTupleKey MapToClientTupleKey(V1TupleSet.V1TupleSetStatus.ManagedTupleState tupleState) => new()
+    private static ClientTupleKey MapToClientTupleKey(V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState tupleState) => new()
     {
         User = tupleState.User,
         Relation = tupleState.Relation,
         Object = tupleState.Object
     };
 
-    private static ClientTupleKeyWithoutCondition MapToClientTupleKeyWithoutCondition(V1TupleSet.V1TupleSetStatus.ManagedTupleState tupleState) => new()
+    private static ClientTupleKeyWithoutCondition MapToClientTupleKeyWithoutCondition(V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState tupleState) => new()
     {
         User = tupleState.User,
         Relation = tupleState.Relation,

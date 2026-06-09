@@ -6,19 +6,19 @@ using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
-[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1alpha", Kind = "TupleSet")]
+[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1", Kind = "FgaTupleSet")]
 [EntityScope(EntityScope.Cluster)]
-public sealed class V1TupleSet : CustomKubernetesEntity<V1TupleSet.V1TupleSetSpec, V1TupleSet.V1TupleSetStatus>
+public sealed class V1FgaTupleSet : CustomKubernetesEntity<V1FgaTupleSet.V1FgaTupleSetSpec, V1FgaTupleSet.V1FgaTupleSetStatus>
 {
-    public class V1TupleSetSpec
+    public class V1FgaTupleSetSpec
     {
         public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
 
         public AuthorizationStoreReference StoreRef { get; set; } = new();
 
-        public List<V1Tuple> Tuples { get; set; } = [];
+        public List<V1FgaTuple> Tuples { get; set; } = [];
 
-        public class V1Tuple
+        public class V1FgaTuple
         {
             [Required]
             public string User { get; set; } = string.Empty;
@@ -31,14 +31,14 @@ public sealed class V1TupleSet : CustomKubernetesEntity<V1TupleSet.V1TupleSetSpe
         }
     }
 
-    public class V1TupleSetStatus
+    public class V1FgaTupleSetStatus
     {
         [Description("List of Tuples managed by K8s")]
-        public List<ManagedTupleState> ManagedTupleStates { get; set; } = [];
+        public List<ManagedFgaTupleState> ManagedTupleStates { get; set; } = [];
 
         public List<V1Condition> Conditions { get; set; } = [];
 
-        public class ManagedTupleState
+        public class ManagedFgaTupleState
         {
             [Description("SHA256 Hash for the tuple")]
             public string Hash { get; set; } = string.Empty;

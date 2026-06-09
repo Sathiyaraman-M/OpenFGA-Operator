@@ -59,7 +59,7 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
         }
     }
 
-    public async Task<TuplesWriteResponse> WriteTuplesAsync(TuplesReconcilationPlan reconcilationPlan, IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> existingStates,
+    public async Task<TuplesWriteResponse> WriteTuplesAsync(TuplesReconcilationPlan reconcilationPlan, IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> existingStates,
         string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
         try

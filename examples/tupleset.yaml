@@ -1,4 +1,4 @@
-apiVersion: openfga.sathiyaraman-m.com/v1alpha
+apiVersion: openfga.sathiyaraman-m.com/v1
 kind: TupleSet
 metadata:
   name: bootstrap-users

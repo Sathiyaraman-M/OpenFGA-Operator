@@ -6,16 +6,16 @@ using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
-[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1alpha", Kind = "AuthorizationStore")]
+[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1", Kind = "FgaStore")]
 [EntityScope(EntityScope.Cluster)]
-public sealed class V1AuthorizationStore : CustomKubernetesEntity<V1AuthorizationStore.V1AuthorizationStoreSpec, V1AuthorizationStore.V1AuthorizationStoreStatus>
+public sealed class V1FgaStore : CustomKubernetesEntity<V1FgaStore.V1FgaStoreSpec, V1FgaStore.V1FgaStoreStatus>
 {
-    public class V1AuthorizationStoreSpec
+    public class V1FgaStoreSpec
     {
         public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
     }
 
-    public class V1AuthorizationStoreStatus
+    public class V1FgaStoreStatus
     {
         [Description("Store ID for the OpenFGA Store")]
         public string StoreId { get; set; } = string.Empty;

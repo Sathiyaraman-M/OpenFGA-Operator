@@ -5,11 +5,11 @@ using KubeOps.Abstractions.Entities.Attributes;
 
 namespace OpenFga.KubeOps.Entities;
 
-[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1alpha", Kind = "ConnectionConfig")]
+[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1", Kind = "FgaConnectionConfig")]
 [EntityScope(EntityScope.Cluster)]
-public sealed class V1ConnectionConfig : CustomKubernetesEntity<V1ConnectionConfig.V1ConnectionConfigSpec>
+public sealed class V1FgaConnectionConfig : CustomKubernetesEntity<V1FgaConnectionConfig.V1FgaConnectionConfigSpec>
 {
-    public class V1ConnectionConfigSpec
+    public class V1FgaConnectionConfigSpec
     {
         [Required]
         [Description("API URL for the OpenFGA Instance")]

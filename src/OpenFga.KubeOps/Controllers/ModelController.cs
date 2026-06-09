@@ -10,11 +10,11 @@ using OpenFga.KubeOps.Services;
 
 namespace OpenFga.KubeOps.Controllers;
 
-[EntityRbac(typeof(V1ConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
-[EntityRbac(typeof(V1AuthorizationModel), Verbs = RbacVerb.All)]
-public sealed class ModelController(ModelService modelService, IKubernetesClient kubernetesClient, ILogger<ModelController> logger) : IEntityController<V1AuthorizationModel>
+[EntityRbac(typeof(V1FgaConnectionConfig), Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Watch)]
+[EntityRbac(typeof(V1FgaAuthorizationModel), Verbs = RbacVerb.All)]
+public sealed class ModelController(ModelService modelService, IKubernetesClient kubernetesClient, ILogger<ModelController> logger) : IEntityController<V1FgaAuthorizationModel>
 {
-    public async Task<ReconciliationResult<V1AuthorizationModel>> ReconcileAsync(V1AuthorizationModel entity, CancellationToken cancellationToken)
+    public async Task<ReconciliationResult<V1FgaAuthorizationModel>> ReconcileAsync(V1FgaAuthorizationModel entity, CancellationToken cancellationToken)
     {
         try
         {
@@ -59,7 +59,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationStoreNotFoundException e)
         {
@@ -81,7 +81,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
         }
         catch (AuthorizationModelUpdateFailedException e)
         {
@@ -109,7 +109,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
         }
         catch (Exception e)
         {
@@ -125,15 +125,15 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1AuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
         }
 
-        return ReconciliationResult<V1AuthorizationModel>.Success(entity);
+        return ReconciliationResult<V1FgaAuthorizationModel>.Success(entity);
     }
 
-    public async Task<ReconciliationResult<V1AuthorizationModel>> DeletedAsync(V1AuthorizationModel entity, CancellationToken cancellationToken)
+    public async Task<ReconciliationResult<V1FgaAuthorizationModel>> DeletedAsync(V1FgaAuthorizationModel entity, CancellationToken cancellationToken)
     {
         logger.LogWarning("The cluster object for OpenFGA Model {} with ID {} is removed. The actual OpenFGA Authorization Models are immutable so they can't be removed.", entity.Name(), entity.Status.ModelId);
-        return ReconciliationResult<V1AuthorizationModel>.Success(entity);
+        return ReconciliationResult<V1FgaAuthorizationModel>.Success(entity);
     }
 }

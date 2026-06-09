@@ -6,11 +6,11 @@ using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
-[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1alpha", Kind = "AuthorizationModel")]
+[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1", Kind = "FgaAuthorizationModel")]
 [EntityScope(EntityScope.Cluster)]
-public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1AuthorizationModel.V1AuthorizationModelSpec, V1AuthorizationModel.V1AuthorizationModelStatus>
+public sealed class V1FgaAuthorizationModel : CustomKubernetesEntity<V1FgaAuthorizationModel.V1FgaAuthorizationModelSpec, V1FgaAuthorizationModel.V1FgaAuthorizationModelStatus>
 {
-    public class V1AuthorizationModelSpec
+    public class V1FgaAuthorizationModelSpec
     {
         public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
 
@@ -21,7 +21,7 @@ public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1Authorizatio
         public AuthorizationStoreReference StoreRef { get; set; } = new();
     }
 
-    public class V1AuthorizationModelStatus
+    public class V1FgaAuthorizationModelStatus
     {
         [Description("Model ID for the current OpenFGA Authorization Model")]
         public string ModelId { get; set; } = string.Empty;

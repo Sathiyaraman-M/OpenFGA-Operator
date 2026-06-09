@@ -8,7 +8,7 @@ namespace OpenFga.KubeOps.Services;
 
 public class StoreService(OpenFgaService openFgaService, EventPublisher eventPublisher, ILogger<StoreService> logger)
 {
-    public async Task<StoreId> EnsureStoreExistsAsync(V1AuthorizationStore store, CancellationToken cancellationToken = default)
+    public async Task<StoreId> EnsureStoreExistsAsync(V1FgaStore store, CancellationToken cancellationToken = default)
     {
         var configRef = store.Spec.ConnectionConfigRef;
 
@@ -41,7 +41,7 @@ public class StoreService(OpenFgaService openFgaService, EventPublisher eventPub
         return await CreateStoreAsync(store, storeName, configRef.Name, cancellationToken);
     }
 
-    private async Task<StoreId> CreateStoreAsync(V1AuthorizationStore store, string storeName, string configName, CancellationToken cancellationToken = default)
+    private async Task<StoreId> CreateStoreAsync(V1FgaStore store, string storeName, string configName, CancellationToken cancellationToken = default)
     {
         await eventPublisher(
             entity: store,

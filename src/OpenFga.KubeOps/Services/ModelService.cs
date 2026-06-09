@@ -8,7 +8,7 @@ namespace OpenFga.KubeOps.Services;
 
 public class ModelService(OpenFgaService openFgaService, ILogger<ModelService> logger)
 {
-    public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1AuthorizationModel model, CancellationToken cancellationToken = default)
+    public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1FgaAuthorizationModel model, CancellationToken cancellationToken = default)
     {
         var modelJsonContent = model.Spec.ModelJson;
         var modelJsonHash = ComputeHash(modelJsonContent);

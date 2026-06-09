@@ -8,7 +8,7 @@ namespace OpenFga.KubeOps.Services;
 
 public class TupleSetService(OpenFgaService openFgaService, EventPublisher eventPublisher, ILogger<TupleSetService> logger)
 {
-    public async Task<ReconcileTupleSetResult> ReconcileTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
+    public async Task<ReconcileTupleSetResult> ReconcileTupleSetAsync(V1FgaTupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var storeRef = tupleSet.Spec.StoreRef;
         var configRef = tupleSet.Spec.ConnectionConfigRef;
@@ -63,7 +63,7 @@ public class TupleSetService(OpenFgaService openFgaService, EventPublisher event
         }
     }
 
-    public async Task DeleteTupleSetAsync(V1TupleSet tupleSet, CancellationToken cancellationToken = default)
+    public async Task DeleteTupleSetAsync(V1FgaTupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var storeRef = tupleSet.Spec.StoreRef;
         var configRef = tupleSet.Spec.ConnectionConfigRef;

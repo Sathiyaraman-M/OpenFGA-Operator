@@ -14,16 +14,16 @@ public class TuplesWriteResponse
 
     public int FailedTupleCount => FailedTuples.Count;
 
-    public List<V1TupleSet.V1TupleSetStatus.ManagedTupleState> TuplesExpectedState { get; }
+    public List<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> TuplesExpectedState { get; }
 
-    private TuplesWriteResponse(bool isfullySuccessful, List<(TupleKey, Exception?)> failedTuples, List<V1TupleSet.V1TupleSetStatus.ManagedTupleState> tuplesExpectedState)
+    private TuplesWriteResponse(bool isfullySuccessful, List<(TupleKey, Exception?)> failedTuples, List<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> tuplesExpectedState)
     {
         FailedTuples = failedTuples;
         TuplesExpectedState = tuplesExpectedState;
         IsFullySuccessFul = isfullySuccessful;
     }
 
-    public static TuplesWriteResponse Create(ClientWriteResponse clientWriteResponse, TuplesReconcilationPlan originalPlan, IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> existingTupleStates)
+    public static TuplesWriteResponse Create(ClientWriteResponse clientWriteResponse, TuplesReconcilationPlan originalPlan, IReadOnlyList<V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState> existingTupleStates)
     {
         var fullySuccessful = clientWriteResponse.Writes.Count(x => x.Status == ClientWriteStatus.SUCCESS) == originalPlan.TuplesToAdd.Count
                                && clientWriteResponse.Deletes.Count(x => x.Status == ClientWriteStatus.SUCCESS) == originalPlan.TuplesToRemove.Count;
@@ -68,9 +68,9 @@ public class TuplesWriteResponse
         return new TuplesWriteResponse(false, failedTuplesWithError, expectedStateForTuples);
     }
 
-    private static V1TupleSet.V1TupleSetStatus.ManagedTupleState MapToManagedTupleState(TupleKey tupleKey)
+    private static V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState MapToManagedTupleState(TupleKey tupleKey)
     {
-        return new V1TupleSet.V1TupleSetStatus.ManagedTupleState
+        return new V1FgaTupleSet.V1FgaTupleSetStatus.ManagedFgaTupleState
         {
             Hash = ComputeHash($"{tupleKey.User}|{tupleKey.Relation}|{tupleKey.Object}"),
             User = tupleKey.User,
