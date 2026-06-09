@@ -1,4 +1,4 @@
-apiVersion: openfga.dev/v1alpha
+apiVersion: openfga.sathiyaraman-m.com/v1alpha
 kind: ConnectionConfig
 metadata:
   name: openfga-dev

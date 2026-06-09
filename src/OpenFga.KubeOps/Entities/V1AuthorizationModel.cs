@@ -6,7 +6,7 @@ using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
-[KubernetesEntity(Group = "openfga.dev", ApiVersion = "v1alpha", Kind = "AuthorizationModel")]
+[KubernetesEntity(Group = "openfga.sathiyaraman-m.com", ApiVersion = "v1alpha", Kind = "AuthorizationModel")]
 [EntityScope(EntityScope.Cluster)]
 public sealed class V1AuthorizationModel : CustomKubernetesEntity<V1AuthorizationModel.V1AuthorizationModelSpec, V1AuthorizationModel.V1AuthorizationModelStatus>
 {
