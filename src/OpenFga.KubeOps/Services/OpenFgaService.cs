@@ -1,3 +1,4 @@
+using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
 using OpenFga.Sdk.Client.Model;
 using OpenFga.Sdk.Exceptions;
@@ -58,14 +59,17 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
         }
     }
 
-    public async Task<ClientWriteResponse> WriteTuplesAsync(List<ClientTupleKey> writes, List<ClientTupleKeyWithoutCondition> deletes, string storeName, string connectionConfigName, CancellationToken cancellationToken)
+    public async Task<TuplesWriteResponse> WriteTuplesAsync(TuplesReconcilationPlan reconcilationPlan, IReadOnlyList<V1TupleSet.V1TupleSetStatus.ManagedTupleState> existingStates,
+        string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
         try
         {
             using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, storeName, cancellationToken);
 
-            var clientWriteRequest = new ClientWriteRequest(writes, deletes);
-            return await openFgaClient.Write(clientWriteRequest, cancellationToken: cancellationToken);
+            var clientWriteRequest = new ClientWriteRequest([.. reconcilationPlan.TuplesToAdd], [.. reconcilationPlan.TuplesToRemove]);
+            var clientWriteResponse = await openFgaClient.Write(clientWriteRequest, cancellationToken: cancellationToken);
+
+            return TuplesWriteResponse.Create(clientWriteResponse, reconcilationPlan, existingStates);
         }
         catch (ApiException e)
         {
