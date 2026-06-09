@@ -1,11 +1,10 @@
 using OpenFga.KubeOps.Models;
-using OpenFga.KubeOps.Services.Resolvers;
 using OpenFga.Sdk.Client.Model;
 using OpenFga.Sdk.Exceptions;
 
 namespace OpenFga.KubeOps.Services;
 
-public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory, AuthorizationStoreResolver authorizationStoreResolver)
+public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
 {
     public async Task<StoreId> CreateStoreAsync(string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
@@ -46,18 +45,31 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory, Authoriza
     {
         try
         {
-            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, cancellationToken);
-            var storeId = await authorizationStoreResolver.ResolveAsync(storeName, cancellationToken);
+            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, storeName, cancellationToken);
 
             var clientWriteModelRequest = ClientWriteAuthorizationModelRequest.FromJson(modelJson);
-            var clientWriteOptions = new ClientWriteOptions { StoreId = storeId };
-            var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, clientWriteOptions, cancellationToken);
+            var clientWriteModelResponse = await openFgaClient.WriteAuthorizationModel(clientWriteModelRequest, cancellationToken: cancellationToken);
 
             return clientWriteModelResponse.AuthorizationModelId;
         }
         catch (ApiException e)
         {
             throw new AuthorizationModelUpdateFailedException(storeName, e);
+        }
+    }
+
+    public async Task<ClientWriteResponse> WriteTuplesAsync(List<ClientTupleKey> writes, List<ClientTupleKeyWithoutCondition> deletes, string storeName, string connectionConfigName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, storeName, cancellationToken);
+
+            var clientWriteRequest = new ClientWriteRequest(writes, deletes);
+            return await openFgaClient.Write(clientWriteRequest, cancellationToken: cancellationToken);
+        }
+        catch (ApiException e)
+        {
+            throw new TuplesWriteFailedException(storeName, e);
         }
     }
 }

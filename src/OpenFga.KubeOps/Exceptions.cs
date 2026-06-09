@@ -11,6 +11,8 @@ public class StoreQueryFailedException(string storeName, ApiException exception)
 
 public class AuthorizationModelUpdateFailedException(string storeName, ApiException exception) : KubeOpsException($"Failed to update Authorization Model for Store {storeName}: {exception.Message}");
 
+public class TuplesWriteFailedException(string storeName, ApiException exception) : KubeOpsException($"Failed to write tuples for Store {storeName}: {exception.Message}");
+
 public class ConnectionConfigNotFoundException(string configName) : KubeOpsException($"Conection Config with name '{configName}' not found");
 
 public class AuthorizationStoreNotFoundException(string storeName) : KubeOpsException($"Authorization Store with name '{storeName}' not found");
