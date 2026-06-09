@@ -2,9 +2,6 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <OperatorName>openfga-operator</OperatorName>
-        <DockerImage>openfga-operator</DockerImage>
-        <DockerImageTag>v1</DockerImageTag>
         <IsPackable>false</IsPackable>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <NoWarn>CA1873</NoWarn>
