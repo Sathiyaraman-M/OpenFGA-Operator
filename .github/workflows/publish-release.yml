@@ -69,7 +69,7 @@ jobs:
         run: |
           helm push \
             openfga-operator-${VERSION_NO_V}.tgz \
-            oci://ghcr.io/${{ env.OWNER_LC }}/charts
+            oci://ghcr.io/sathiyaraman-m/charts
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
