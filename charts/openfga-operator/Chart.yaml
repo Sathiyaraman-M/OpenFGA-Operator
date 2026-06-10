@@ -1,0 +1,6 @@
+apiVersion: v2
+name: openfga-operator
+description: Kubernetes Operator for managing OpenFGA artifacts in a Kubernetes cluster.
+
+version: 0.0.0-dev
+appVersion: "0.0.0-dev"

@@ -1,0 +1,15 @@
+name: openfga-operator
+serviceAccountName: openfga-operator-sa
+
+image:
+  repository: ghcr.io/sathiyaraman-m/openfga-operator
+
+resource:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+terminationGracePeriodSeconds: 10

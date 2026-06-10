@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+      - env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+        imagePullPolicy: IfNotPresent
+        name: {{ .Values.name }}
+        resources:
+          limits:
+            cpu: {{ .Values.resource.limits.cpu }}
+            memory: {{ .Values.resource.limits.memory }}
+          requests:
+            cpu: {{ .Values.resource.requests.cpu }}
+            memory: {{ .Values.resource.requests.memory }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
