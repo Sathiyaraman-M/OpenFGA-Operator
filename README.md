@@ -85,6 +85,10 @@ kubectl apply -f examples/
 
 See [`examples/README.md`](examples/README.md) for more info.
 
+## Documentation
+
+Additional documentation is available in the [docs](docs/) directory.
+
 ## Development
 
 For local development, testing, and building from source, see the development documentation.
