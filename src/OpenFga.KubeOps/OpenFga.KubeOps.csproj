@@ -14,6 +14,10 @@
       </PackageReference>
       <PackageReference Include="KubeOps.Operator" />
       <PackageReference Include="OpenFga.Sdk" />
+      <PackageReference Include="Serilog.Extensions.Hosting" />
+      <PackageReference Include="Serilog.Formatting.Compact" />
+      <PackageReference Include="Serilog.Settings.Configuration" />
+      <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
 
 </Project>
