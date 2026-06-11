@@ -1,5 +1,5 @@
 apiVersion: openfga.sathiyaraman-m.com/v1
-kind: AuthorizationStore
+kind: FgaAuthorizationStore
 metadata:
   name: demo-store
 spec:

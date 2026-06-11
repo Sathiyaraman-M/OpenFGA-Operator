@@ -1,97 +1,104 @@
-# OpenFGA KubeOps Operator
+# OpenFGA K8s Operator
 
-This repository contains an OpenFGA operator implemented with KubeOps. This operator is to manage OpenFGA artifacts in Kubernetes way.
+Kubernetes operator for managing OpenFGA stores, authorization models, and tuples using Kubernetes custom resources.
 
-> [!IMPORTANT]
-> This project is in early development and is not production-ready. The key parts of the operator are subject to change. And most importantly, this is NOT an official OpenFGA project.
+> [!WARNING]
+> This operator is currently in alpha. APIs and CRDs may change between releases.
 
 > [!NOTE]
-> This operator doesn't deploy or manage the OpenFGA instance itself. It assumes you have an OpenFGA instance running and accessible from your Kubernetes cluster. The operator focuses on managing OpenFGA stores, models, and tuples as Kubernetes custom resources.
+> This is a community project and is not affiliated with or endorsed by OpenFGA.
 
-## Prerequisites
+## Why?
 
-- .NET 10 SDK
-- Docker
-- kubectl
-- helm (Optional)
-- A running `kind` cluster with OpenFGA installed
+> Inspired by Terraform-style reconciliation for OpenFGA resources, but designed to fit into Kubernetes-native workflows.
 
-## Install an OpenFGA instance in your cluster
+OpenFGA artifacts such as authorization models and bootstrap tuples are often managed separately from application deployments through custom scripts or Terraform pipelines.
 
-Run the following command to install OpenFGA in your cluster using Helm:
+This operator allows you to manage OpenFGA resources declaratively using Kubernetes manifests, alongside your application deployments. 
 
-```sh
-helm repo add openfga https://openfga.github.io/helm-charts
-helm repo update
-helm install openfga openfga/openfga --namespace openfga --create-namespace
+If you are already using any GitOps workflow, it fits right in. The operator continuously reconciles the desired state defined in your manifests, with the OpenFGA instance.
+
+## Features
+
+- Create and manage OpenFGA stores using Kubernetes custom resources
+- Upload and version OpenFGA authorization models
+- Manage bootstrap tuples declaratively
+- Safe tuple deletion through operator-owned state tracking (Runtime tuples are untouched)
+- Continuous reconciliation of desired state
+- GitOps-friendly
+
+## Custom Resources
+
+The operator provides the following custom resources:
+
+| Resource                | Purpose                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `FgaConnectionConfig`   | Defines how the operator connects to an OpenFGA instance |
+| `FgaStore`              | Represents an OpenFGA store                              |
+| `FgaAuthorizationModel` | Manages authorization models within a store              |
+| `FgaTupleSet`           | Manages operator-owned tuples within a store             |
+
+These resources can be combined to declaratively manage OpenFGA artifacts using Kubernetes manifests.
+
+See the [`examples/`](examples/) directory for a complete working configuration.
+
+## Installation
+
+Install the operator using Helm:
+
+```bash
+helm install openfga-operator oci://ghcr.io/sathiyaraman-m/charts/openfga-operator \
+  --version 1.0.0-alpha1 \
+  --namespace openfga-system \
+  --create-namespace
 ```
 
-## Build & Deploy (local kind cluster)
+> [!NOTE]
+> The operator doesn't provision OpenFGA instances. You must have an OpenFGA instance running and accessible from your Kubernetes cluster before using the operator.
 
-Run these commands from the repository root:
+## Quick Start
 
-1. Install the KubeOps CLI (global dotnet tool)
+The repository contains a complete example showing how to:
 
-```sh
-dotnet tool install --global KubeOps.Cli
+- Configure a connection to an OpenFGA instance
+- Create an OpenFGA store
+- Upload an authorization model
+- Manage bootstrap tuples
+
+See the examples directory for detailed instructions and manifests:
+
+```
+examples/
+├── model.fga                   # Example authorization model for reference
+├── connectionConfig.yaml
+├── store.yaml
+├── model.yaml
+├── tupleset.yaml
+└── README.md
 ```
 
-2. Build the project
+Apply the example resources after installing the operator:
 
-```sh
-dotnet build
+```bash
+kubectl apply -f examples/
 ```
 
-3. Build the operator Docker image
+See [`examples/README.md`](examples/README.md) for more info.
 
-```sh
-docker build -t openfga-operator:v1alpha .
-```
+## Documentation
 
-4. Load the image into your `kind` cluster
+Additional documentation is available in the [docs](docs/) directory.
 
-```sh
-kind load docker-image openfga-operator:v1alpha
-```
+## Development
 
-5. Generate operator manifests with the KubeOps CLI
+For local development, testing, and building from source, see the development documentation.
 
-```sh
-cd src/OpenFga.KubeOps
-kubeops generate operator openfga-operator ./OpenFga.KubeOps.csproj \
-  --out Outputs \
-  --docker-image openfga-operator \
-  --docker-image-tag v1alpha \
-  --clear-out
-```
+## Contributing
 
-This generates YAML/Kustomize outputs in `src/OpenFga.KubeOps/Outputs`.
+Contributions, bug reports, and feature requests are welcome.
 
-6. Apply the generated manifests
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-```sh
-kubectl apply -k Outputs
-```
+## License
 
-7. Return to repository root and apply example CRs
-
-```sh
-cd ../..
-kubectl apply -f examples
-```
-
-## What these steps do
-
-- Build the .NET operator binary (`dotnet build`).
-- Package the operator into a Docker image and load that image into your `kind` cluster so Pods can use it without pushing to a registry.
-- Use the KubeOps CLI to generate Kubernetes manifests (Deployment, RBAC, CRDs, etc.) tailored to the project and the specified Docker image/tag.
-- Apply the manifests and example custom resources to create the operator and example workloads in the cluster.
-
-## Cleanup
-
-To remove the operator and example resources:
-
-```sh
-kubectl delete -k src/OpenFga.KubeOps/Outputs
-kubectl delete -f examples
-```
+Licensed under the MIT License. See [LICENSE](LICENSE).

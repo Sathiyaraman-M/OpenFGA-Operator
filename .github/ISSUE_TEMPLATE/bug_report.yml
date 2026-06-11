@@ -1,0 +1,48 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+    value: |
+      Thank you for reporting a bug.
+
+  - type: textarea
+    id: description
+    attributes:
+    label: Description
+    description: Describe the issue and the expected behavior.
+    validations:
+    required: true
+
+  - type: input
+    id: operator-version
+    attributes:
+    label: Operator Version
+    placeholder: 1.0.0-alpha1
+
+  - type: input
+    id: kubernetes-version
+    attributes:
+    label: Kubernetes Version
+    placeholder: v1.33.0
+
+  - type: input
+    id: openfga-version
+    attributes:
+    label: OpenFGA Version
+    placeholder: v1.10.0
+
+  - type: textarea
+    id: manifests
+    attributes:
+    label: Relevant Manifests
+    description: Paste any relevant Kubernetes manifests.
+
+  - type: textarea
+    id: logs
+    attributes:
+    label: Logs
+    description: Paste any relevant operator logs or error messages.

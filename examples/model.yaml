@@ -1,5 +1,5 @@
 apiVersion: openfga.sathiyaraman-m.com/v1
-kind: AuthorizationModel
+kind: FgaAuthorizationModel
 metadata:
   name: demo-model
 spec:
