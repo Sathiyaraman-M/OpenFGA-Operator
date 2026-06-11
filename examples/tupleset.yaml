@@ -1,5 +1,5 @@
 apiVersion: openfga.sathiyaraman-m.com/v1
-kind: TupleSet
+kind: FgaTupleSet
 metadata:
   name: bootstrap-users
 spec:
