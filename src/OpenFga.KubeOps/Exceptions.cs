@@ -16,3 +16,5 @@ public class TuplesWriteFailedException(string storeName, ApiException exception
 public class ConnectionConfigNotFoundException(string configName) : KubeOpsException($"Conection Config with name '{configName}' not found");
 
 public class AuthorizationStoreNotFoundException(string storeName) : KubeOpsException($"Authorization Store with name '{storeName}' not found");
+
+public class StoreManifestNotFoundException(string storeName) : KubeOpsException($"Manifest for Authorization Store with name '{storeName}' not found");

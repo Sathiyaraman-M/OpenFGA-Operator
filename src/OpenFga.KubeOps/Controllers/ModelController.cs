@@ -20,21 +20,16 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
         {
             var result = await modelService.UpdateAuthorizationModelAsync(entity, cancellationToken);
 
+            entity.Status.StoreId = result.StoreId;
             entity.Status.ModelId = result.ModelId;
             entity.Status.ObservedModelHash = result.ModelJsonHash;
 
             entity.Status.Conditions = [
                 V1Condition.New(
-                    type: "ConnectionConfigReady",
-                    status: "True",
-                    reason: "ConnectionConfigFound",
-                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
-                ),
-                V1Condition.New(
                     type: "StoreReady",
                     status: "True",
                     reason: "StoreFound",
-                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible."
+                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible. Store ID is {result.StoreId}."
                 ),
                 V1Condition.New(
                     type: "ModelReady",
@@ -45,15 +40,15 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
         }
-        catch (ConnectionConfigNotFoundException e)
+        catch (StoreManifestNotFoundException e)
         {
-            logger.LogError(e, "Connection config with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.ConnectionConfigRef.Name, entity.Name());
+            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef.Name, entity.Name());
 
             entity.Status.Conditions = [
                 V1Condition.New(
-                    type: "ConnectionConfigReady",
+                    type: "StoreReady",
                     status: "False",
-                    reason: "ConnectionConfigNotFound",
+                    reason: "StoreManifestNotFound",
                     message: e.Message
                 )
             ];
@@ -66,12 +61,6 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             logger.LogError(e, "Store with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef.Name, entity.Name());
 
             entity.Status.Conditions = [
-                V1Condition.New(
-                    type: "ConnectionConfigReady",
-                    status: "True",
-                    reason: "ConnectionConfigFound",
-                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
-                ),
                 V1Condition.New(
                     type: "StoreReady",
                     status: "False",
@@ -89,16 +78,10 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
 
             entity.Status.Conditions = [
                 V1Condition.New(
-                    type: "ConnectionConfigReady",
-                    status: "True",
-                    reason: "ConnectionConfigFound",
-                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
-                ),
-                V1Condition.New(
                     type: "StoreReady",
-                    status: "False",
-                    reason: "StoreNotFound",
-                    message: e.Message
+                    status: "True",
+                    reason: "StoreFound",
+                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible."
                 ),
                 V1Condition.New(
                     type: "ModelReady",
