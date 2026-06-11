@@ -9,5 +9,9 @@
     </PackageVersion>
     <PackageVersion Include="KubeOps.Operator" Version="11.2.0" />
     <PackageVersion Include="OpenFga.Sdk" Version="0.10.3" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
   </ItemGroup>
 </Project>

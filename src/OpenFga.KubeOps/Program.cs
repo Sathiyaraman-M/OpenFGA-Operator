@@ -1,10 +1,13 @@
 using KubeOps.Operator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenFga.KubeOps.Extensions;
 using OpenFga.KubeOps.Services;
 using OpenFga.KubeOps.Services.Resolvers;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddSerilog(builder.Configuration);
 
 builder.Services
     .AddKubernetesOperator()
