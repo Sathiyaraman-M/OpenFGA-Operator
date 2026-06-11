@@ -3,8 +3,6 @@ kind: FgaAuthorizationModel
 metadata:
   name: demo-model
 spec:
-  connectionConfigRef:
-    name: openfga-dev
   storeRef:
     name: demo-store
   modelJson: |

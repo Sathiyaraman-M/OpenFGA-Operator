@@ -9,7 +9,6 @@ Authorization models define the types, relations, and permissions used by OpenFG
 Before creating an `FgaAuthorizationModel` resource:
 
 * A connected OpenFGA instance must be available
-* A corresponding `FgaConnectionConfig` resource must exist
 * A corresponding `FgaStore` resource must exist
 * The target store must be successfully reconciled
 
@@ -21,8 +20,6 @@ kind: FgaAuthorizationModel
 metadata:
   name: my-authorization-model
 spec:
-  connectionConfigRef:
-    name: my-connection-config
   storeRef:
     name: my-store
   modelJson: |
@@ -72,6 +69,7 @@ Example:
 
 ```yaml
 status:
+  storeId: 01HXXXXXXXXXXXXXXX
   modelId: 01JXXXXXXXXXXXXXXX
   observedModelHash: ... # SHA256 hash of the model definition used to detect changes
   conditions:
