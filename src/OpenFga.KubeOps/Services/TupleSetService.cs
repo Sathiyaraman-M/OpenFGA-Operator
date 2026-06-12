@@ -3,20 +3,22 @@ using KubeOps.Abstractions.Events;
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
+using OpenFga.KubeOps.Services.Resolvers;
 
 namespace OpenFga.KubeOps.Services;
 
-public class TupleSetService(OpenFgaService openFgaService, EventPublisher eventPublisher, ILogger<TupleSetService> logger)
+public class TupleSetService(OpenFgaService openFgaService, AuthorizationStoreResolver authorizationStoreResolver, EventPublisher eventPublisher, ILogger<TupleSetService> logger)
 {
     public async Task<ReconcileTupleSetResult> ReconcileTupleSetAsync(V1FgaTupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var storeRef = tupleSet.Spec.StoreRef;
-        var configRef = tupleSet.Spec.ConnectionConfigRef;
+        var storeManifest = await authorizationStoreResolver.ResolveManifestAsync(storeRef.Name, cancellationToken);
+        var configRef = storeManifest.Spec.ConnectionConfigRef;
 
         var reconcilationPlan = TuplesReconcilationPlan.CreateForWrite(tupleSet);
         if (reconcilationPlan.TuplesToAdd.Count == 0 && reconcilationPlan.TuplesToRemove.Count == 0)
         {
-            return new ReconcileTupleSetResult(true, [.. reconcilationPlan.DesiredStates]);
+            return new ReconcileTupleSetResult(true, tupleSet.Status.StoreId, [.. reconcilationPlan.DesiredStates]);
         }
 
         logger.LogInformation("Reconciling tuple set {TupleSetName} for store {StoreRefName}. Adding {AddCount} tuples and removing {RemoveCount} tuples.", tupleSet.Name(), storeRef.Name, reconcilationPlan.TuplesToAdd.Count, reconcilationPlan.TuplesToRemove.Count);
@@ -42,7 +44,7 @@ public class TupleSetService(OpenFgaService openFgaService, EventPublisher event
                 cancellationToken: cancellationToken
             );
 
-            return new ReconcileTupleSetResult(true, tuplesWriteResponse.TuplesExpectedState);
+            return new ReconcileTupleSetResult(true, storeManifest.Status.StoreId, tuplesWriteResponse.TuplesExpectedState);
         }
         else
         {
@@ -59,14 +61,15 @@ public class TupleSetService(OpenFgaService openFgaService, EventPublisher event
                 cancellationToken: cancellationToken
             );
 
-            return new ReconcileTupleSetResult(false, tuplesWriteResponse.TuplesExpectedState);
+            return new ReconcileTupleSetResult(false, storeManifest.Status.StoreId, tuplesWriteResponse.TuplesExpectedState);
         }
     }
 
     public async Task DeleteTupleSetAsync(V1FgaTupleSet tupleSet, CancellationToken cancellationToken = default)
     {
         var storeRef = tupleSet.Spec.StoreRef;
-        var configRef = tupleSet.Spec.ConnectionConfigRef;
+        var storeManifest = await authorizationStoreResolver.ResolveManifestAsync(storeRef.Name, cancellationToken);
+        var configRef = storeManifest.Spec.ConnectionConfigRef;
 
         var reconcilationPlan = TuplesReconcilationPlan.CreateForDelete(tupleSet);
         if (reconcilationPlan.TuplesToRemove.Count == 0)

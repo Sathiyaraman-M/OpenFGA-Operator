@@ -21,6 +21,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
             var result = await tupleSetService.ReconcileTupleSetAsync(entity, cancellationToken);
             if (!result.IsSuccessful)
             {
+                entity.Status.StoreId = result.StoreId;
                 entity.Status.Conditions = [
                     V1Condition.New(
                         type: "Ready",
@@ -40,6 +41,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
                 );
             }
 
+            entity.Status.StoreId = result.StoreId;
             entity.Status.ManagedTupleStates = result.ManagedTupleStates;
             entity.Status.Conditions = [
                 V1Condition.New(
@@ -52,15 +54,15 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
         }
-        catch (ConnectionConfigNotFoundException e)
+        catch (StoreManifestNotFoundException e)
         {
-            logger.LogError(e, "Error while reconciling OpenFGA Tuple Set {}", entity.Name());
+            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Tuple Set {}.", entity.Spec.StoreRef.Name, entity.Name());
 
             entity.Status.Conditions = [
                 V1Condition.New(
                     type: "Ready",
                     status: "False",
-                    reason: "ConnectionConfigNotFound",
+                    reason: "StoreManifestNotFound",
                     message: e.Message
                 )
             ];
