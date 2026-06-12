@@ -1,12 +1,13 @@
 using Microsoft.Extensions.Logging;
 using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
+using OpenFga.KubeOps.Services.Resolvers;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
-public class ModelService(OpenFgaService openFgaService, ILogger<ModelService> logger)
+public class ModelService(OpenFgaService openFgaService, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
 {
     public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1FgaAuthorizationModel model, CancellationToken cancellationToken = default)
     {
@@ -18,12 +19,13 @@ public class ModelService(OpenFgaService openFgaService, ILogger<ModelService> l
             var existingModelId = model.Status.ModelId;
             if (!string.IsNullOrWhiteSpace(existingModelId))
             {
-                return new UpdateAuthorizationModelResult(model.Status.ModelId, modelJsonHash);
+                return new UpdateAuthorizationModelResult(model.Status.ModelId, modelJsonHash, model.Status.StoreId);
             }
         }
 
-        var configRef = model.Spec.ConnectionConfigRef;
         var storeRef = model.Spec.StoreRef;
+        var storeManifest = await authorizationStoreResolver.ResolveManifestAsync(storeRef.Name, cancellationToken);
+        var configRef = storeManifest.Spec.ConnectionConfigRef;
 
         logger.LogInformation("Updating authorization model for store {StoreName} with hash {ModelHash}.", storeRef.Name, modelJsonHash);
 
@@ -31,7 +33,7 @@ public class ModelService(OpenFgaService openFgaService, ILogger<ModelService> l
 
         logger.LogInformation("Updated authorization model for store {StoreName} with new model ID {ModelId}.", storeRef.Name, modelId);
 
-        return new UpdateAuthorizationModelResult(modelId, modelJsonHash);
+        return new UpdateAuthorizationModelResult(modelId, modelJsonHash, storeManifest.Status.StoreId);
     }
 
     private static string ComputeHash(string content)

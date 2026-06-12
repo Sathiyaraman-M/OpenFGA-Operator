@@ -12,8 +12,6 @@ public sealed class V1FgaAuthorizationModel : CustomKubernetesEntity<V1FgaAuthor
 {
     public class V1FgaAuthorizationModelSpec
     {
-        public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
-
         [Required]
         [Description("FGA Model Content in JSON format")]
         public string ModelJson { get; set; } = string.Empty;
@@ -23,6 +21,9 @@ public sealed class V1FgaAuthorizationModel : CustomKubernetesEntity<V1FgaAuthor
 
     public class V1FgaAuthorizationModelStatus
     {
+        [Description("Store ID for the OpenFGA Store associated with the Authorization Model")]
+        public string StoreId { get; set; } = string.Empty;
+
         [Description("Model ID for the current OpenFGA Authorization Model")]
         public string ModelId { get; set; } = string.Empty;
 

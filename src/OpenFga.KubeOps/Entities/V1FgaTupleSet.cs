@@ -12,8 +12,6 @@ public sealed class V1FgaTupleSet : CustomKubernetesEntity<V1FgaTupleSet.V1FgaTu
 {
     public class V1FgaTupleSetSpec
     {
-        public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
-
         public AuthorizationStoreReference StoreRef { get; set; } = new();
 
         public List<V1FgaTuple> Tuples { get; set; } = [];
@@ -33,6 +31,9 @@ public sealed class V1FgaTupleSet : CustomKubernetesEntity<V1FgaTupleSet.V1FgaTu
 
     public class V1FgaTupleSetStatus
     {
+        [Description("Store ID for the OpenFGA Store associated with the Tuple Set")]
+        public string StoreId { get; set; } = string.Empty;
+
         [Description("List of Tuples managed by K8s")]
         public List<ManagedFgaTupleState> ManagedTupleStates { get; set; } = [];
 

@@ -17,14 +17,6 @@ spec:
         properties:
           spec:
             properties:
-              connectionConfigRef:
-                properties:
-                  name:
-                    description: Name of the Connection Config to use to connect an OpenFGA instance
-                    type: string
-                required:
-                - name
-                type: object
               modelJson:
                 description: FGA Model Content in JSON format
                 type: string
@@ -66,6 +58,9 @@ spec:
                 type: string
               observedModelHash:
                 description: SHA256 Hash for the current OpenFGA Authorization Model
+                type: string
+              storeId:
+                description: Store ID for the OpenFGA Store associated with the Authorization Model
                 type: string
             type: object
         required:
