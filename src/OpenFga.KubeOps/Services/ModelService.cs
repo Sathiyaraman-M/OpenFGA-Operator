@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using OpenFga.KubeOps.Abstractions;
 using OpenFga.KubeOps.Entities;
 using OpenFga.KubeOps.Models;
 using OpenFga.KubeOps.Services.Resolvers;
@@ -7,11 +8,12 @@ using System.Text;
 
 namespace OpenFga.KubeOps.Services;
 
-public class ModelService(OpenFgaService openFgaService, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
+public class ModelService(OpenFgaService openFgaService, IModelTransformer modelTransformer, AuthorizationStoreResolver authorizationStoreResolver, ILogger<ModelService> logger)
 {
     public async Task<UpdateAuthorizationModelResult> UpdateAuthorizationModelAsync(V1FgaAuthorizationModel model, CancellationToken cancellationToken = default)
     {
-        var modelJsonContent = model.Spec.ModelJson;
+        var modelDslContent = model.Spec.ModelDsl;
+        var modelJsonContent = await modelTransformer.TransformDslToJsonAsync(modelDslContent);
         var modelJsonHash = ComputeHash(modelJsonContent);
 
         if (model.Status.ObservedModelHash == modelJsonHash)
