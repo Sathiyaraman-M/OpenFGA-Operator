@@ -22,10 +22,13 @@ metadata:
 spec:
   storeRef:
     name: my-store
-  modelJson: |
-    {
-      ...
-    }
+  modelDsl: |
+    model
+      schema 1.1
+    type user
+    type document
+      relations
+        define viewer: [user]
 ```
 
 ## Reconciliation

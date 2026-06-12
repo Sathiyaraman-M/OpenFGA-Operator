@@ -17,8 +17,8 @@ spec:
         properties:
           spec:
             properties:
-              modelJson:
-                description: FGA Model Content in JSON format
+              modelDsl:
+                description: FGA Model Content in DSL format
                 type: string
               storeRef:
                 properties:
@@ -29,7 +29,7 @@ spec:
                 - name
                 type: object
             required:
-            - modelJson
+            - modelDsl
             type: object
           status:
             properties:

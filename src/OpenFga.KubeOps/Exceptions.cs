@@ -18,3 +18,5 @@ public class ConnectionConfigNotFoundException(string configName) : KubeOpsExcep
 public class AuthorizationStoreNotFoundException(string storeName) : KubeOpsException($"Authorization Store with name '{storeName}' not found");
 
 public class StoreManifestNotFoundException(string storeName) : KubeOpsException($"Manifest for Authorization Store with name '{storeName}' not found");
+
+public class ModelTransformationFailedException(string details) : KubeOpsException($"Model transformation failed: {details}");

@@ -1,8 +1,10 @@
 using KubeOps.Operator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenFga.KubeOps.Abstractions;
 using OpenFga.KubeOps.Extensions;
 using OpenFga.KubeOps.Services;
+using OpenFga.KubeOps.Services.ModelTransformers;
 using OpenFga.KubeOps.Services.Resolvers;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -28,6 +30,7 @@ builder.Services.AddScoped<OpenFgaService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<ModelService>();
 builder.Services.AddScoped<TupleSetService>();
+builder.Services.AddScoped<IModelTransformer, FgaCliModelTransformer>();
 
 using var host = builder.Build();
 await host.RunAsync();

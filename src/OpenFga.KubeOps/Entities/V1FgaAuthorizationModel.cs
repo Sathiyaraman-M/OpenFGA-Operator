@@ -13,8 +13,8 @@ public sealed class V1FgaAuthorizationModel : CustomKubernetesEntity<V1FgaAuthor
     public class V1FgaAuthorizationModelSpec
     {
         [Required]
-        [Description("FGA Model Content in JSON format")]
-        public string ModelJson { get; set; } = string.Empty;
+        [Description("FGA Model Content in DSL format")]
+        public string ModelDsl { get; set; } = string.Empty;
 
         public AuthorizationStoreReference StoreRef { get; set; } = new();
     }
