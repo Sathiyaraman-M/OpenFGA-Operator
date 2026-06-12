@@ -9,7 +9,7 @@ using OpenFga.KubeOps.Services.Resolvers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddSerilog(builder.Configuration);
+builder.Services.AddSerilog(builder.Configuration, builder.Environment.IsDevelopment());
 
 builder.Services
     .AddKubernetesOperator()
