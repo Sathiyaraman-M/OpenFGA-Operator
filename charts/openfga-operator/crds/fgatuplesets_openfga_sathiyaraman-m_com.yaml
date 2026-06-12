@@ -17,14 +17,6 @@ spec:
         properties:
           spec:
             properties:
-              connectionConfigRef:
-                properties:
-                  name:
-                    description: Name of the Connection Config to use to connect an OpenFGA instance
-                    type: string
-                required:
-                - name
-                type: object
               storeRef:
                 properties:
                   name:
@@ -86,6 +78,9 @@ spec:
                       type: string
                   type: object
                 type: array
+              storeId:
+                description: Store ID for the OpenFGA Store associated with the Tuple Set
+                type: string
             type: object
         type: object
     served: true
