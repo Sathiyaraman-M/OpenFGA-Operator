@@ -9,7 +9,6 @@ Tuple sets are typically used for bootstrap permissions, role assignments, and o
 Before creating an `FgaTupleSet` resource:
 
 * A connected OpenFGA instance must be available
-* A corresponding `FgaConnectionConfig` resource must exist
 * A corresponding `FgaStore` resource must exist
 * The target store must be successfully reconciled
 * An authorization model should already be available in the target store
@@ -22,8 +21,6 @@ kind: FgaTupleSet
 metadata:
   name: bootstrap-tuples
 spec:
-  connectionConfigRef:
-    name: my-connection-config
   storeRef:
     name: my-store
   tuples:
@@ -113,6 +110,7 @@ Example:
 
 ```yaml
 status:
+  storeId: 01HXXXXXXXXXXXXXXX
   managedTupleStates:
     - hash: ... # SHA256 hash of the tuple for change detection
       user: user:anne
