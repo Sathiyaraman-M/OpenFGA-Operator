@@ -24,6 +24,7 @@ builder.Services
 builder.Services.AddScoped<ConnectionConfigResolver>();
 builder.Services.AddScoped<AuthorizationStoreResolver>();
 builder.Services.AddScoped<OpenFgaClientFactory>();
+builder.Services.AddScoped<OpenFgaService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<ModelService>();
 builder.Services.AddScoped<TupleSetService>();
