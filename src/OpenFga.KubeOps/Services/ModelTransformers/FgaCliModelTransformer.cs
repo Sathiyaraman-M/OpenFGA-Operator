@@ -10,7 +10,7 @@ public sealed class FgaCliModelTransformer : IModelTransformer
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "/usr/local/bin/fga",
-            Arguments = $"model transform '{modelDsl}' --input-format=fga --output-format=json",
+            Arguments = $"model transform \"{modelDsl}\" --input-format=fga --output-format=json",
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
