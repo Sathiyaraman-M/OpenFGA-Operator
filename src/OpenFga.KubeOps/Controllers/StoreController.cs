@@ -39,7 +39,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
         }
         catch (ConnectionConfigNotFoundException e)
         {
-            logger.LogError(e, "Error while reconciling OpenFGA Store {}", entity.Name());
+            logger.LogError(e, "Error while connecting to OpenFGA Store {}. Connection config with name {} is not found.", entity.Name(), entity.Spec.ConnectionConfigRef);
 
             entity.Status.Conditions = [
                 V1Condition.New(
@@ -49,6 +49,29 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
                     message: e.Message
                 )
             ];
+            await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
+            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
+        }
+        catch (MultipleStoresFoundException e)
+        {
+            logger.LogError(e, "Error while reconciling OpenFGA Store {}. Multiple stores with name {} are found in OpenFGA.", entity.Name(), entity.Name());
+
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "MultipleStoresFound",
+                    message: e.Message
+                )
+            ];
+
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
             return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
