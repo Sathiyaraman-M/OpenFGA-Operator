@@ -33,8 +33,18 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
             var listStoresRequest = new ClientListStoresRequest() { Name = storeName };
             var listStoresResponse = await openFgaClient.ListStores(listStoresRequest, cancellationToken: cancellationToken);
 
-            var targetStore = listStoresResponse.Stores.FirstOrDefault(x => x.Name == storeName);
-            return targetStore != null ? (StoreId)targetStore.Id : null;
+            if (listStoresResponse.Stores.Count == 0)
+            {
+                return null;
+            }
+
+            if (listStoresResponse.Stores.Count > 1)
+            {
+                throw new MultipleStoresFoundException(storeName);
+            }
+
+            var targetStore = listStoresResponse.Stores.First();
+            return targetStore.Id;
         }
         catch (ApiException e)
         {
