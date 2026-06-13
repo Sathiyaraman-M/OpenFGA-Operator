@@ -3,8 +3,7 @@ kind: FgaAuthorizationModel
 metadata:
   name: demo-model
 spec:
-  storeRef:
-    name: demo-store
+  storeRef: demo-store
   modelDsl: |
     model
       schema 1.1

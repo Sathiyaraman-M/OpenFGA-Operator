@@ -2,7 +2,6 @@ using k8s.Models;
 
 using KubeOps.Abstractions.Entities;
 using KubeOps.Abstractions.Entities.Attributes;
-using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
@@ -12,7 +11,9 @@ public sealed class V1FgaStore : CustomKubernetesEntity<V1FgaStore.V1FgaStoreSpe
 {
     public class V1FgaStoreSpec
     {
-        public ConnectionConfigReference ConnectionConfigRef { get; set; } = new();
+        [Required]
+        [Description("Name of the Connection Config to use to connect an OpenFGA instance")]
+        public string ConnectionConfigRef { get; set; } = string.Empty;
     }
 
     public class V1FgaStoreStatus

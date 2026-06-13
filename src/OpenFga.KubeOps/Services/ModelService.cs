@@ -26,14 +26,14 @@ public class ModelService(OpenFgaService openFgaService, IModelTransformer model
         }
 
         var storeRef = model.Spec.StoreRef;
-        var storeManifest = await authorizationStoreResolver.ResolveManifestAsync(storeRef.Name, cancellationToken);
+        var storeManifest = await authorizationStoreResolver.ResolveManifestAsync(storeRef, cancellationToken);
         var configRef = storeManifest.Spec.ConnectionConfigRef;
 
-        logger.LogInformation("Updating authorization model for store {StoreName} with hash {ModelHash}.", storeRef.Name, modelJsonHash);
+        logger.LogInformation("Updating authorization model for store {StoreName} with hash {ModelHash}.", storeRef, modelJsonHash);
 
-        var modelId = await openFgaService.UpdateAuthorizationModelAsync(modelJsonContent, storeRef.Name, configRef.Name, cancellationToken);
+        var modelId = await openFgaService.UpdateAuthorizationModelAsync(modelJsonContent, storeRef, configRef, cancellationToken);
 
-        logger.LogInformation("Updated authorization model for store {StoreName} with new model ID {ModelId}.", storeRef.Name, modelId);
+        logger.LogInformation("Updated authorization model for store {StoreName} with new model ID {ModelId}.", storeRef, modelId);
 
         return new UpdateAuthorizationModelResult(modelId, modelJsonHash, storeManifest.Status.StoreId);
     }

@@ -29,7 +29,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
                     type: "StoreReady",
                     status: "True",
                     reason: "StoreFound",
-                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible. Store ID is {result.StoreId}."
+                    message: $"Store with name {entity.Spec.StoreRef} is found and accessible. Store ID is {result.StoreId}."
                 ),
                 V1Condition.New(
                     type: "ModelReady",
@@ -42,7 +42,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
         }
         catch (StoreManifestNotFoundException e)
         {
-            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef.Name, entity.Name());
+            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef, entity.Name());
 
             entity.Status.Conditions = [
                 V1Condition.New(
@@ -58,7 +58,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
         }
         catch (AuthorizationStoreNotFoundException e)
         {
-            logger.LogError(e, "Store with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef.Name, entity.Name());
+            logger.LogError(e, "Store with name {} is not found for OpenFGA Authorization Model {}.", entity.Spec.StoreRef, entity.Name());
 
             entity.Status.Conditions = [
                 V1Condition.New(
@@ -74,14 +74,14 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
         }
         catch (AuthorizationModelUpdateFailedException e)
         {
-            logger.LogError(e, "Failed to update OpenFGA Authorization Model {} for store {}.", entity.Name(), entity.Spec.StoreRef.Name);
+            logger.LogError(e, "Failed to update OpenFGA Authorization Model {} for store {}.", entity.Name(), entity.Spec.StoreRef);
 
             entity.Status.Conditions = [
                 V1Condition.New(
                     type: "StoreReady",
                     status: "True",
                     reason: "StoreFound",
-                    message: $"Store with name {entity.Spec.StoreRef.Name} is found and accessible."
+                    message: $"Store with name {entity.Spec.StoreRef} is found and accessible."
                 ),
                 V1Condition.New(
                     type: "ModelReady",

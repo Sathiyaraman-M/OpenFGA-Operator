@@ -18,13 +18,8 @@ spec:
           spec:
             properties:
               storeRef:
-                properties:
-                  name:
-                    description: Name of the Target OpenFGA Store
-                    type: string
-                required:
-                - name
-                type: object
+                description: Name of the OpenFGA Store to which this Authorization Model belongs
+                type: string
               tuples:
                 items:
                   properties:
@@ -40,6 +35,8 @@ spec:
                   - user
                   type: object
                 type: array
+            required:
+            - storeRef
             type: object
           status:
             properties:
@@ -82,6 +79,8 @@ spec:
                 description: Store ID for the OpenFGA Store associated with the Tuple Set
                 type: string
             type: object
+        required:
+        - spec
         type: object
     served: true
     storage: true

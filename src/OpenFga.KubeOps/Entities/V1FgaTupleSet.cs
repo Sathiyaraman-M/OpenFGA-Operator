@@ -2,7 +2,6 @@ using k8s.Models;
 
 using KubeOps.Abstractions.Entities;
 using KubeOps.Abstractions.Entities.Attributes;
-using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
@@ -12,7 +11,9 @@ public sealed class V1FgaTupleSet : CustomKubernetesEntity<V1FgaTupleSet.V1FgaTu
 {
     public class V1FgaTupleSetSpec
     {
-        public AuthorizationStoreReference StoreRef { get; set; } = new();
+        [Required]
+        [Description("Name of the OpenFGA Store to which this Authorization Model belongs")]
+        public string StoreRef { get; set; } = string.Empty;
 
         public List<V1FgaTuple> Tuples { get; set; } = [];
 
