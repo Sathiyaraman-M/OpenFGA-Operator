@@ -21,8 +21,7 @@ kind: FgaTupleSet
 metadata:
   name: bootstrap-tuples
 spec:
-  storeRef:
-    name: my-store
+  storeRef: my-store
   tuples:
     - user: user:anne
       relation: admin

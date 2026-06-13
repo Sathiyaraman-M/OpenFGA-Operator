@@ -3,5 +3,4 @@ kind: FgaStore
 metadata:
   name: demo-store
 spec:
-  connectionConfigRef:
-    name: openfga-dev
+  connectionConfigRef: openfga-dev

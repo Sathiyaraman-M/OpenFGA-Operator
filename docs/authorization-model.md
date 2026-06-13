@@ -20,8 +20,7 @@ kind: FgaAuthorizationModel
 metadata:
   name: my-authorization-model
 spec:
-  storeRef:
-    name: my-store
+  storeRef: my-store
   modelDsl: |
     model
       schema 1.1

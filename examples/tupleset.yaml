@@ -3,8 +3,7 @@ kind: FgaTupleSet
 metadata:
   name: bootstrap-users
 spec:
-  storeRef:
-    name: demo-store
+  storeRef: demo-store
   tuples:
     - user: user:alice
       relation: member

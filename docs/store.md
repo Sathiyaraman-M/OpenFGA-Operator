@@ -19,8 +19,7 @@ kind: FgaStore
 metadata:
   name: my-store
 spec:
-  connectionConfigRef:
-    name: my-connection-config
+  connectionConfigRef: my-connection-config
 ```
 
 ## Store Naming
