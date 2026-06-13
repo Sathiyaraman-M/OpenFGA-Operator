@@ -52,6 +52,23 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
         }
     }
 
+    public async Task<bool> CheckIfStoreExistsAsync(StoreId storeId, string connectionConfigName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var openFgaClient = await openFgaClientFactory.CreateAsync(connectionConfigName, cancellationToken);
+
+            var getStoreOptions = new ClientReadOptions() { StoreId = storeId };
+            var getStoreResponse = await openFgaClient.GetStore(getStoreOptions, cancellationToken);
+
+            return getStoreResponse.Id == storeId;
+        }
+        catch (FgaApiNotFoundError)
+        {
+            throw new AuthorizationStoreNotFoundException(storeId);
+        }
+    }
+
     public async Task<AuthorizationModelId> UpdateAuthorizationModelAsync(string modelJson, string storeName, string connectionConfigName, CancellationToken cancellationToken)
     {
         try
