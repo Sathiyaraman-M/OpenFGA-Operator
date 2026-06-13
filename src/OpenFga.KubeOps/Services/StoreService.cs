@@ -20,7 +20,7 @@ public class StoreService(OpenFgaService openFgaService, EventPublisher eventPub
 
         var storeName = store.Name();
 
-        var storeId = await openFgaService.GetStoreIdByNameAsync(storeName, configRef.Name, cancellationToken);
+        var storeId = await openFgaService.GetStoreIdByNameAsync(storeName, configRef, cancellationToken);
         if (storeId != null)
         {
             logger.LogInformation("Store with name {StoreName} already exists in OpenFGA with ID {StoreId}.", storeName, storeId);
@@ -38,7 +38,7 @@ public class StoreService(OpenFgaService openFgaService, EventPublisher eventPub
 
         logger.LogInformation("Store with name {StoreName} not found in OpenFGA. Creating new store.", storeName);
 
-        return await CreateStoreAsync(store, storeName, configRef.Name, cancellationToken);
+        return await CreateStoreAsync(store, storeName, configRef, cancellationToken);
     }
 
     private async Task<StoreId> CreateStoreAsync(V1FgaStore store, string storeName, string configName, CancellationToken cancellationToken = default)

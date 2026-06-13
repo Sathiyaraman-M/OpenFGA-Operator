@@ -31,7 +31,7 @@ public class TupleSetService(OpenFgaService openFgaService, AuthorizationStoreRe
             cancellationToken: cancellationToken
         );
 
-        var tuplesWriteResponse = await openFgaService.WriteTuplesAsync(reconcilationPlan, tupleSet.Status.ManagedTupleStates, storeRef.Name, configRef.Name, cancellationToken);
+        var tuplesWriteResponse = await openFgaService.WriteTuplesAsync(reconcilationPlan, tupleSet.Status.ManagedTupleStates, storeRef.Name, configRef, cancellationToken);
         if (tuplesWriteResponse.IsFullySuccessFul)
         {
             logger.LogInformation("Successfully reconciled tuple set {TupleSetName} for store {StoreRefName}. Added {AddCount} tuples and removed {RemoveCount} tuples.", tupleSet.Name(), storeRef.Name, reconcilationPlan.TuplesToAdd.Count, reconcilationPlan.TuplesToRemove.Count);
@@ -79,7 +79,7 @@ public class TupleSetService(OpenFgaService openFgaService, AuthorizationStoreRe
 
         logger.LogInformation("Deleting tuple set {TupleSetName} for store {StoreRefName}. Removing {RemoveCount} tuples.", tupleSet.Name(), storeRef.Name, reconcilationPlan.TuplesToRemove.Count);
 
-        var tuplesWriteResponse = await openFgaService.WriteTuplesAsync(reconcilationPlan, tupleSet.Status.ManagedTupleStates, storeRef.Name, configRef.Name, cancellationToken);
+        var tuplesWriteResponse = await openFgaService.WriteTuplesAsync(reconcilationPlan, tupleSet.Status.ManagedTupleStates, storeRef.Name, configRef, cancellationToken);
         if (tuplesWriteResponse.IsFullySuccessFul)
         {
             logger.LogInformation("Successfully deleted tuple set {TupleSetName} for store {StoreRefName}. Removed {RemoveCount} tuples.", tupleSet.Name(), storeRef.Name, reconcilationPlan.TuplesToRemove.Count);

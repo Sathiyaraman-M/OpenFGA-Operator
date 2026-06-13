@@ -26,7 +26,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
                     type: "ConnectionConfigReady",
                     status: "True",
                     reason: "ConnectionConfigFound",
-                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef} is found and accessible."
                 ),
                 V1Condition.New(
                     type: "StoreReady",
@@ -62,7 +62,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
                     type: "ConnectionConfigReady",
                     status: "True",
                     reason: "ConnectionConfigFound",
-                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef.Name} is found and accessible."
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef} is found and accessible."
                 ),
                 V1Condition.New(
                     type: "StoreReady",

@@ -31,7 +31,7 @@ public class ModelService(OpenFgaService openFgaService, IModelTransformer model
 
         logger.LogInformation("Updating authorization model for store {StoreName} with hash {ModelHash}.", storeRef.Name, modelJsonHash);
 
-        var modelId = await openFgaService.UpdateAuthorizationModelAsync(modelJsonContent, storeRef.Name, configRef.Name, cancellationToken);
+        var modelId = await openFgaService.UpdateAuthorizationModelAsync(modelJsonContent, storeRef.Name, configRef, cancellationToken);
 
         logger.LogInformation("Updated authorization model for store {StoreName} with new model ID {ModelId}.", storeRef.Name, modelId);
 
