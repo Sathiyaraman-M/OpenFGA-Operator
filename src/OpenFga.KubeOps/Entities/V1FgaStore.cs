@@ -14,6 +14,9 @@ public sealed class V1FgaStore : CustomKubernetesEntity<V1FgaStore.V1FgaStoreSpe
         [Required]
         [Description("Name of the Connection Config to use to connect an OpenFGA instance")]
         public string ConnectionConfigRef { get; set; } = string.Empty;
+
+        [Description("Existing Store ID in OpenFGA. If omitted, the operator will create/find a store using metadata.name.")]
+        public string? ExistingStoreId { get; set; }
     }
 
     public class V1FgaStoreStatus
