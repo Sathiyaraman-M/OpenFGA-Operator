@@ -65,7 +65,11 @@ public class OpenFgaService(OpenFgaClientFactory openFgaClientFactory)
         }
         catch (FgaApiNotFoundError)
         {
-            throw new AuthorizationStoreNotFoundException(storeId);
+            return false;
+        }
+        catch (ApiException e)
+        {
+            throw new StoreQueryFailedException(storeId, e);
         }
     }
 
