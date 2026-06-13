@@ -12,10 +12,20 @@ public class StoreService(OpenFgaService openFgaService, EventPublisher eventPub
     {
         var configRef = store.Spec.ConnectionConfigRef;
 
-        var existingStoreId = store.Status.StoreId;
-        if (!string.IsNullOrWhiteSpace(existingStoreId))
+        var existingStoreIdFromStatus = store.Status.StoreId;
+        if (!string.IsNullOrWhiteSpace(existingStoreIdFromStatus))
         {
-            return existingStoreId;
+            return existingStoreIdFromStatus;
+        }
+
+        var existingStoreIdFromSpec = store.Spec.ExistingStoreId;
+        if (!string.IsNullOrWhiteSpace(existingStoreIdFromSpec))
+        {
+            var storeExists = await openFgaService.CheckIfStoreExistsAsync(existingStoreIdFromSpec, configRef, cancellationToken);
+            if (storeExists)            {
+                logger.LogInformation("Store with ID {StoreId} specified in spec already exists in OpenFGA. Using the existing store.", existingStoreIdFromSpec);
+                return existingStoreIdFromSpec;
+            }
         }
 
         var storeName = store.Name();
