@@ -1,5 +1,13 @@
 # OpenFGA K8s Operator
 
+<span>
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Sathiyaraman-M/OpenFGA-Operator?include_prereleases&sort=semver&display_name=tag">
+    <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/Sathiyaraman-M/OpenFGA-Operator/publish-release.yml">
+    <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues-pr-closed/Sathiyaraman-M/OpenFGA-Operator">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/Sathiyaraman-M/OpenFGA-Operator">
+</span>
+
+
 Kubernetes operator for managing OpenFGA stores, authorization models, and tuples using Kubernetes custom resources.
 
 > [!WARNING]
@@ -48,7 +56,7 @@ Install the operator using Helm:
 
 ```bash
 helm install openfga-operator oci://ghcr.io/sathiyaraman-m/charts/openfga-operator \
-  --version 1.0.0-alpha1 \
+  --version 1.0.0-alpha5 \
   --namespace openfga-system \
   --create-namespace
 ```
