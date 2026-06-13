@@ -8,4 +8,9 @@ public record StoreId
 
     public static implicit operator string(StoreId storeId) => storeId.Value;
     public static implicit operator StoreId(string storeId) => new(storeId);
+
+    public override string ToString()
+    {
+        return Value;
+    }
 }

@@ -8,5 +8,9 @@ public record AuthorizationModelId
 
     public static implicit operator string(AuthorizationModelId authorizationModelId) => authorizationModelId.Value;
     public static implicit operator AuthorizationModelId(string authorizationModelId) => new(authorizationModelId);
-}
 
+    public override string ToString()
+    {
+        return Value;
+    }
+}
