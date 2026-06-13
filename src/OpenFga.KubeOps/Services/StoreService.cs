@@ -12,10 +12,42 @@ public class StoreService(OpenFgaService openFgaService, EventPublisher eventPub
     {
         var configRef = store.Spec.ConnectionConfigRef;
 
-        var existingStoreId = store.Status.StoreId;
-        if (!string.IsNullOrWhiteSpace(existingStoreId))
+        var existingStoreIdFromStatus = store.Status.StoreId;
+        if (!string.IsNullOrWhiteSpace(existingStoreIdFromStatus))
         {
-            return existingStoreId;
+            return existingStoreIdFromStatus;
+        }
+
+        var existingStoreIdFromSpec = store.Spec.ExistingStoreId;
+        if (!string.IsNullOrWhiteSpace(existingStoreIdFromSpec))
+        {
+            var storeExists = await openFgaService.CheckIfStoreExistsAsync(existingStoreIdFromSpec, configRef, cancellationToken);
+            if (storeExists)
+            {
+                logger.LogInformation("Found existing store with ID {StoreId} in OpenFGA as specified in the store manifest {StoreName}.", existingStoreIdFromSpec, store.Name());
+
+                await eventPublisher(
+                    entity: store,
+                    reason: "StoreAlreadyExists",
+                    message: $"Found existing store with ID {existingStoreIdFromSpec} in OpenFGA as specified in the store manifest {store.Name()}. No action is needed.",
+                    type: EventType.Normal,
+                    cancellationToken: cancellationToken
+                );
+
+                return existingStoreIdFromSpec;
+            }
+            else
+            {
+                await eventPublisher(
+                    entity: store,
+                    reason: "StoreNotFound",
+                    message: $"No existing store with ID {existingStoreIdFromSpec} found in OpenFGA as specified in the store manifest {store.Name()}.",
+                    type: EventType.Warning,
+                    cancellationToken: cancellationToken
+                );
+                
+                throw new NoExistingStoreFoundException(store.Name(), existingStoreIdFromSpec);
+            }
         }
 
         var storeName = store.Name();

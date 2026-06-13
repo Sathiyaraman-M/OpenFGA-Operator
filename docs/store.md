@@ -37,6 +37,23 @@ creates an OpenFGA store named `my-store`.
 
 Choose the store name carefully before creating the resource.
 
+## Importing Existing Store
+
+To manage an existing OpenFGA store with the operator, pass the existing store's Store ID at `spec.existingStoreId` as shown below:
+
+```yaml
+apiVersion: openfga.sathiyaraman-m.com/v1
+kind: FgaStore
+metadata:
+  name: my-store
+spec:
+  connectionConfigRef: my-connection-config
+  existingStoreId: 01JXXXXXXXXXXXXXXX
+```
+
+> [!NOTE]
+> The `spec.existingStoreId` field is optional, but if provided, it takes precedence over the resource name for store identification.
+
 ## Reconciliation
 
 When an `FgaStore` resource is created, the operator:

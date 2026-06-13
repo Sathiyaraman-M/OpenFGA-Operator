@@ -76,6 +76,28 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
 
             return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
         }
+        catch (NoExistingStoreFoundException e)
+        {
+            logger.LogError(e, "Error while reconciling OpenFGA Store {}. No existing store with ID {} is found in OpenFGA.", entity.Name(), e.Message);
+
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "ConnectionConfigReady",
+                    status: "True",
+                    reason: "ConnectionConfigFound",
+                    message: $"Connection config with name {entity.Spec.ConnectionConfigRef} is found and accessible."
+                ),
+                V1Condition.New(
+                    type: "StoreReady",
+                    status: "False",
+                    reason: "NoExistingStoreFound",
+                    message: e.Message
+                )
+            ];
+            await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
+            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
+        }
         catch (StoreCreationFailedException e)
         {
             logger.LogError(e, "Error while reconciling OpenFGA Store {}", entity.Name());

@@ -1,3 +1,4 @@
+using OpenFga.KubeOps.Models;
 using OpenFga.Sdk.Exceptions;
 
 namespace OpenFga.KubeOps;
@@ -17,6 +18,8 @@ public class TuplesWriteFailedException(string storeName, ApiException exception
 public class ConnectionConfigNotFoundException(string configName) : KubeOpsException($"Conection Config with name '{configName}' not found");
 
 public class AuthorizationStoreNotFoundException(string storeName) : KubeOpsException($"Authorization Store with name '{storeName}' not found");
+
+public class NoExistingStoreFoundException(string storeName, StoreId existingStoreId) : KubeOpsException($"No existing Authorization Store with ID '{existingStoreId}' found for Store '{storeName}'");
 
 public class StoreManifestNotFoundException(string storeName) : KubeOpsException($"Manifest for Authorization Store with name '{storeName}' not found");
 
