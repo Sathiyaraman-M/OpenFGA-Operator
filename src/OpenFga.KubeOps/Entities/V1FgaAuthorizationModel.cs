@@ -2,7 +2,6 @@ using k8s.Models;
 
 using KubeOps.Abstractions.Entities;
 using KubeOps.Abstractions.Entities.Attributes;
-using OpenFga.KubeOps.Entities.Shared;
 
 namespace OpenFga.KubeOps.Entities;
 
@@ -16,7 +15,9 @@ public sealed class V1FgaAuthorizationModel : CustomKubernetesEntity<V1FgaAuthor
         [Description("FGA Model Content in DSL format")]
         public string ModelDsl { get; set; } = string.Empty;
 
-        public AuthorizationStoreReference StoreRef { get; set; } = new();
+        [Required]
+        [Description("Name of the OpenFGA Store to which this Authorization Model belongs")]
+        public string StoreRef { get; set; } = string.Empty;
     }
 
     public class V1FgaAuthorizationModelStatus

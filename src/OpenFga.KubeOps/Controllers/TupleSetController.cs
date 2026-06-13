@@ -56,7 +56,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
         }
         catch (StoreManifestNotFoundException e)
         {
-            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Tuple Set {}.", entity.Spec.StoreRef.Name, entity.Name());
+            logger.LogError(e, "Store manifest with name {} is not found for OpenFGA Tuple Set {}.", entity.Spec.StoreRef, entity.Name());
 
             entity.Status.Conditions = [
                 V1Condition.New(
