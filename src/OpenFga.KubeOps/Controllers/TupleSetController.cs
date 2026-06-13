@@ -87,6 +87,23 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
         }
+        catch (TuplesWriteFailedException e)
+        {
+            logger.LogError(e, "Error while reconciling OpenFGA Tuple Set {}", entity.Name());
+
+            entity.Status.Conditions = [
+                V1Condition.New(
+                    type: "Ready",
+                    status: "False",
+                    reason: "TuplesWriteFailed",
+                    message: e.Message
+                )
+            ];
+
+            await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
+
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
+        }
         catch (Exception e)
         {
             logger.LogError(e, "Something went wrong while reconciling OpenFGA Tuple Set {}", entity.Name());
