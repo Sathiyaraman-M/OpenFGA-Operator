@@ -18,13 +18,10 @@ spec:
           spec:
             properties:
               connectionConfigRef:
-                properties:
-                  name:
-                    description: Name of the Connection Config to use to connect an OpenFGA instance
-                    type: string
-                required:
-                - name
-                type: object
+                description: Name of the Connection Config to use to connect an OpenFGA instance
+                type: string
+            required:
+            - connectionConfigRef
             type: object
           status:
             properties:
@@ -52,6 +49,8 @@ spec:
                 description: Store ID for the OpenFGA Store
                 type: string
             type: object
+        required:
+        - spec
         type: object
     served: true
     storage: true

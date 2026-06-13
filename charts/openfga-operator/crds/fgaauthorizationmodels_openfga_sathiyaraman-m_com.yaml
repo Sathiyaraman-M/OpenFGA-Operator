@@ -21,15 +21,11 @@ spec:
                 description: FGA Model Content in DSL format
                 type: string
               storeRef:
-                properties:
-                  name:
-                    description: Name of the Target OpenFGA Store
-                    type: string
-                required:
-                - name
-                type: object
+                description: Name of the OpenFGA Store to which this Authorization Model belongs
+                type: string
             required:
             - modelDsl
+            - storeRef
             type: object
           status:
             properties:
