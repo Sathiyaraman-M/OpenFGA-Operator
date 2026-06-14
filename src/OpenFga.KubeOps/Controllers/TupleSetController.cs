@@ -68,7 +68,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (AuthorizationStoreNotFoundException e)
         {
@@ -85,7 +85,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (TuplesWriteFailedException e)
         {
@@ -102,7 +102,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (Exception e)
         {
@@ -119,7 +119,7 @@ public sealed class TupleSetController(TupleSetService tupleSetService, IKuberne
 
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaTupleSet>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
 
         return ReconciliationResult<V1FgaTupleSet>.Success(entity);

@@ -54,7 +54,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (AuthorizationStoreNotFoundException e)
         {
@@ -70,7 +70,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (AuthorizationModelUpdateFailedException e)
         {
@@ -92,7 +92,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (Exception e)
         {
@@ -108,7 +108,7 @@ public sealed class ModelController(ModelService modelService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaAuthorizationModel>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
 
         return ReconciliationResult<V1FgaAuthorizationModel>.Success(entity);

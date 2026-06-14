@@ -51,7 +51,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (MultipleStoresFoundException e)
         {
@@ -118,7 +118,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
         catch (Exception e)
         {
@@ -134,7 +134,7 @@ public sealed class StoreController(StoreService storeService, IKubernetesClient
             ];
             await kubernetesClient.UpdateStatusAsync(entity, cancellationToken);
 
-            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e);
+            return ReconciliationResult<V1FgaStore>.Failure(entity, e.Message, e, requeueAfter: TimeSpan.FromMinutes(1));
         }
 
         return ReconciliationResult<V1FgaStore>.Success(entity);
